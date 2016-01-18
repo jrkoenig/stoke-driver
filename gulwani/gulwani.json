@@ -1,0 +1,201 @@
+[{
+  "src_file": "p01.cc",
+  "func": "p01",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p01",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p02.cc",
+  "func": "p02",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p02",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p03.cc",
+  "func": "p03",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p03",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p04.cc",
+  "func": "p04",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p04",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p05.cc",
+  "func": "p05",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p05",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p06.cc",
+  "func": "p06",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p06",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p07.cc",
+  "func": "p07",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p07",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p08.cc",
+  "func": "p08",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p08",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p09.cc",
+  "func": "p09",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p09",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p10.cc",
+  "func": "p10",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p10",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p11.cc",
+  "func": "p11",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p11",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p12.cc",
+  "func": "p12",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p12",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p13.cc",
+  "func": "p13",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p13",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p14.cc",
+  "func": "p14",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p14",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p15.cc",
+  "func": "p15",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p15",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p16.cc",
+  "func": "p16",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p16",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p17.cc",
+  "func": "p17",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p17",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p18.cc",
+  "func": "p18",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p18",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p19.cc",
+  "func": "p19",
+  "argc": 3,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p19",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p20.cc",
+  "func": "p20",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p20",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p21.cc",
+  "func": "p21",
+  "argc": 4,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p21",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p22.cc",
+  "func": "p22",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p22",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p23.cc",
+  "func": "p23",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p23",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p24.cc",
+  "func": "p24",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p24",
+  "tags": ["bit-manip", "gulwani"]
+},{
+  "src_file": "p25.cc",
+  "func": "p25",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "p25",
+  "tags": ["bit-manip", "gulwani"]
+}]
