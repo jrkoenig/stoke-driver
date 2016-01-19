@@ -56,11 +56,14 @@ class StokeRunner(object):
             pass
 
 
+def _mk_set(l):
+    return "{ " + " ".join(l) + (" }" if len(l) > 0 else "}")
+
 def build_args(target):
     return [
       "--init", "zero",
       "--testcases", "test.cases",
-      "--training_set","{ ... }",
+      "--training_set", "{ ... }",
       "--target", "target.s",
       "--out", "out.s",
       "--initial_instruction_number", "32",
@@ -73,4 +76,6 @@ def build_args(target):
       "--beta", "1",
       "--seed", "0",
       "--distance", "hamming",
-      "--sig_penalty", "100"] + target.def_in + target.live_out
+      "--sig_penalty", "100",
+      "--def_in", _mk_set(target.def_in),
+      "--live_out", _mk_set(target.live_out)]

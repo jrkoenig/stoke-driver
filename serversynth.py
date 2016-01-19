@@ -68,12 +68,8 @@ def main():
     build_cache = stokeversion.BuildCache()
     print "Scanning build cache..."
     build_cache.scan()
-    print "Building targets"
-    targets = synthtarget.make_all_from_c("gulwani/gulwani.json")
-
     print "Ready for jobs..."
     while True:
-
         msg = None
         if accepting_jobs and len(inprogress) == 0:
             msg = s.get_sync()
@@ -84,7 +80,7 @@ def main():
 
         if msg is not None:
             job = json.loads(str(msg.data()), 'utf-8')
-            job['target'] = targets[job['target']]
+            job['target'] = synthtarget.SynthTarget.from_json(job['target'])
             try:
                 inprogress.append(WorkTask(job, msg, build_cache))
             except Exception as e:
