@@ -4,7 +4,7 @@ import json, os, sys, gzip, random, shutil, time
 import stokerunner, synthtarget, stokeversion
 import pg, pgmq
 
-parallelism = 4
+parallelism = 52
 
 class WorkTask(object):
     def __init__(self, job, msg, build_cache):
@@ -69,6 +69,7 @@ def main():
     print "Scanning build cache..."
     build_cache.scan()
     print "Ready for jobs..."
+    sys.stdout.flush()
     while True:
         msg = None
         if accepting_jobs and len(inprogress) == 0:

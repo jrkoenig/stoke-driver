@@ -29,7 +29,7 @@ class StokeVersion(object):
             print 'Updating submodules...'
             subprocess.check_call(['git','submodule','update'], cwd = self.path)
             print 'Making...'
-            retcode = subprocess.call(['make', '-j', '10'], cwd = self.path)
+            retcode = subprocess.call(['make', 'NTHREADS=10'], cwd = self.path)
             self.built_success = (retcode == 0)
             print 'Done.', "Built sucessfully" if self.built_success else "Failed."
         finally:

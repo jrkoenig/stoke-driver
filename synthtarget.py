@@ -13,7 +13,6 @@ class SynthTarget(object):
         with gzip.GzipFile(fileobj = stream, mode = "w") as f:
           f.write(testcases)
         self._testcases_gz_base64 = base64.b64encode(stream.getvalue())
-        print "len of testcases compressed is", len(self._testcases_gz_base64)
     def _get_testcases(self):
         stream = StringIO.StringIO(base64.b64decode(self._testcases_gz_base64))
         with gzip.GzipFile(fileobj = stream, mode = "r") as f:
