@@ -36,14 +36,26 @@ class StokeRunner(object):
         stdout.close()
         stderr.close()
 
+    def wait(self):
+        return self.proc.wait()
     def finished(self):
         return self.proc.poll() is not None
     def successful(self):
-        return self.proc.poll() == 0
+        return self.proc.poll() in [0,1]
     def get_file(self, fname):
         try:
             with open(os.path.join(self.tdir,fname), "r") as f:
                 return f.read()
+        except:
+            return None
+    def get_gz_file(self, fname):
+        try:
+            with open(os.path.join(self.tdir,fname), "r") as fstream:
+            ostream = io.BytesIO()
+            gstream = gzip.GzipFile(str(f), "wb", 9, ostream)
+            shutil.copyfileobj(fstream, gstream)
+            gstream.close()
+            return ostream.value()
         except:
             return None
     def cleanup(self):
