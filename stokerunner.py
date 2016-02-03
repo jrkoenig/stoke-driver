@@ -51,11 +51,11 @@ class StokeRunner(object):
     def get_gz_file(self, fname):
         try:
             with open(os.path.join(self.tdir,fname), "r") as fstream:
-            ostream = io.BytesIO()
-            gstream = gzip.GzipFile(str(f), "wb", 9, ostream)
-            shutil.copyfileobj(fstream, gstream)
-            gstream.close()
-            return ostream.value()
+                ostream = io.BytesIO()
+                gstream = gzip.GzipFile(str(f), "wb", 9, ostream)
+                shutil.copyfileobj(fstream, gstream)
+                gstream.close()
+                return ostream.value()
         except:
             return None
     def cleanup(self):
