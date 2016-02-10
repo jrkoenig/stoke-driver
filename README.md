@@ -91,9 +91,17 @@ The `targetbuilder` takes C++ code and turns it into a SynthTarget python object
 #### JSONL
 This format contains summaries of the results of running a series of STOKE runs. Each line is a json encoded value:
 
-    {"name":"p03","iters":544,"elapsed":0.0285951,"cost":0,"limit":20000000,"correct":true,"asm":".p03:\nxorq %rax, %rax..."}
+    {"name":"p03","iters":544,"elapsed":0.0285951,"cost":0, "limit":20000000,"correct":true,"asm":".p03:\nxorq %rax, %rax..."}
         
-There are no newlines within the JSON document, thus allowing a very simple python parsing routine: `for l in open("results.jsonl"): data = json.loads(l)`. The keys are:
+There are no newlines within the JSON document, thus allowing a very simple python parsing routine:
+
+```python
+for l in open("results.jsonl"):
+    data = json.loads(l)
+    # use data['name'], data['elapsed'], etc.
+```
+
+The keys are:
 
 - `name` gulwani example, `p01`, `p02`, etc.
 - `iters` total iterations of the search. Equal to limit if the search timed out.
