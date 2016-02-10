@@ -50,7 +50,6 @@ def main():
             runner.add_args(["--cycle_timeout", str(TIMEOUT),
                              "--timeout_iterations", str(TIMEOUT)])
             runner.launch()
-            
             runner.wait()
             if runner.successful():
                 save_result(f, filelock, runner, name, target)

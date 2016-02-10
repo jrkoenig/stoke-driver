@@ -20,7 +20,6 @@ def get_iter_counts(conn, series):
     c = conn.cursor()
     c.execute("SELECT result_json FROM distr_output WHERE series = %s",[series])
     for (l,) in c:
-    #for l in open(series,"r"):
         result = json.loads(str(l.strip()), 'utf-8')
         n = result["name"]
         i = int(result["iters"]) if result["correct"] else None
@@ -36,6 +35,7 @@ def main():
     MAX = 20000000
 
     conn = pg.connect('jrkoenig')
+    get_iter_counts(conn, 2)
     
 if __name__ == "__main__":
     main()
