@@ -33,9 +33,11 @@ def save_result(f, l, runner, name, target):
         f.write(json.dumps(output,  separators=(',',':'), ensure_ascii=True)+"\n")
         f.flush()
     for log, data in [("search", runner.get_gz_file("search.binlog"))]:
-        with open(os.path.join(LOG_DIR, name+"-"+str(lognum)+"-"+log+".gz"), 'wb') as logout:
-            if data is not None:
+        if data is not None:
+            with open(os.path.join(LOG_DIR, name+"-"+str(lognum)+"-"+log+".gz"), 'wb') as logout:
                 logout.write(data)
+        else:
+            print "Could not get binlog file"
 def main():
     targets = targetbuilder.make_all_from_c("gulwani/gulwani.json")
     filelock = threading.Lock()

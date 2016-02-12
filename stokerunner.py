@@ -1,5 +1,5 @@
 
-import subprocess, shutil, tempfile, os
+import subprocess, shutil, tempfile, os, io, gzip
 
 class StokeRunner(object):
     def __init__(self, stoke_bin = 'stoke'):
@@ -52,10 +52,10 @@ class StokeRunner(object):
         try:
             with open(os.path.join(self.tdir,fname), "r") as fstream:
                 ostream = io.BytesIO()
-                gstream = gzip.GzipFile(str(f), "wb", 9, ostream)
+                gstream = gzip.GzipFile(str(fname), "wb", 5, ostream)
                 shutil.copyfileobj(fstream, gstream)
                 gstream.close()
-                return ostream.value()
+                return ostream.getvalue()
         except:
             return None
     def cleanup(self):
