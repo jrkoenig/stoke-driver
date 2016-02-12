@@ -29,7 +29,7 @@ class StokeRunner(object):
 
         stdout = open(os.path.join(self.tdir,"stdout.out"), "w")
         stderr = open(os.path.join(self.tdir,"stderr.out"), "w")
-        self.proc = subprocess.Popen([self.stoke_bin, "search"] + self.args,
+        self.proc = subprocess.Popen([self.stoke_bin, "searchexpt"] + self.args,
                                      cwd = self.tdir,
                                      stdout = stdout.fileno(),
                                      stderr = stderr.fileno())
@@ -41,7 +41,7 @@ class StokeRunner(object):
     def finished(self):
         return self.proc.poll() is not None
     def successful(self):
-        return self.proc.poll() in [0,1]
+        return self.proc.poll() == 0
     def get_file(self, fname):
         try:
             with open(os.path.join(self.tdir,fname), "r") as f:
@@ -75,17 +75,13 @@ def build_args(target):
     return [
       "--init", "zero",
       "--testcases", "test.cases",
-      "--training_set", "{ ... }",
       "--target", "target.s",
-      "--out", "out.s",
       "--initial_instruction_number", "32",
       "--machine_output", "search.json",
-      "--failed_verification_action", "quit",
-      "--strategy", "none",
       "--cost", "correctness",
       "--reduction", "sum",
       "--misalign_penalty", "3",
-      "--beta", "1",
+      "--beta", "1.0",
       "--seed", "0",
       "--distance", "hamming",
       "--sig_penalty", "100",
