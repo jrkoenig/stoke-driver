@@ -35,7 +35,7 @@ class WorkTask(object):
             r = json.loads(self.runner.get_file("search.json"))
             output = {'iters': r["statistics"]["total_iterations"],
                       'limit': self.timeout,
-                      'name': name,
+                      'name': self.name,
                       'correct': r['success'], 'cost': r["current"]['cost'], 'asm': r["current"]['code'],
                       'elapsed': r["statistics"]["total_time"]}
             print "Finished", self.name, "in", output['iters'], "iterations"
