@@ -4,15 +4,13 @@ import threading, json, os, sys, gzip, random
 import pg, pgmq, targetbuilder
 
 
-RUNS = 500
+RUNS = 5
 TIMEOUT = 20*1000*1000
-series_name = "strict_nonincrease"
+series_name = "generate_logs_test"
 progs = ['p{:02d}'.format(i+1) for i in range(25)]
-progs = [p for p in progs if p != 'p19']
-#progs = ['p18','p10','p11','p12','p17','p20','p21','p24']
-#progs = ['p19']
+progs = [p for p in progs]
 randomize = False
-stoke_hash = 'd2a59111d6d16590d93e7bb39f3bece2de0aabdf'
+stoke_hash = 'b3d92cbb5fa488cbce923a6db583899c0295dedc'
 
 def main():
     targets = targetbuilder.make_all_from_c("gulwani/gulwani.json")

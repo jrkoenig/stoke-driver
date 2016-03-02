@@ -1,5 +1,5 @@
 
-import subprocess, shutil, tempfile, os
+import subprocess, shutil, tempfile, os, io, gzip
 
 class StokeRunner(object):
     def __init__(self, stoke_bin = 'stoke'):
@@ -29,7 +29,7 @@ class StokeRunner(object):
 
         stdout = open(os.path.join(self.tdir,"stdout.out"), "w")
         stderr = open(os.path.join(self.tdir,"stderr.out"), "w")
-        self.proc = subprocess.Popen([self.stoke_bin, "search"] + self.args,
+        self.proc = subprocess.Popen([self.stoke_bin, "searchexpt"] + self.args,
                                      cwd = self.tdir,
                                      stdout = stdout.fileno(),
                                      stderr = stderr.fileno())
@@ -41,7 +41,7 @@ class StokeRunner(object):
     def finished(self):
         return self.proc.poll() is not None
     def successful(self):
-        return self.proc.poll() in [0,1]
+        return self.proc.poll() == 0
     def get_file(self, fname):
         try:
             with open(os.path.join(self.tdir,fname), "r") as f:
@@ -52,12 +52,12 @@ class StokeRunner(object):
         try:
             with open(os.path.join(self.tdir,fname), "r") as fstream:
                 ostream = io.BytesIO()
-                gstream = gzip.GzipFile(str(f), "wb", 9, ostream)
+                gstream = gzip.GzipFile(str(fname), "wb", 9, ostream)
                 shutil.copyfileobj(fstream, gstream)
                 gstream.close()
-                return ostream.value()
+                return ostream.getvalue()
         except:
-            return None
+            raise
     def cleanup(self):
         try:
             if self.tdir != '':
@@ -77,11 +77,8 @@ def build_args(target):
       "--testcases", "test.cases",
       "--training_set", "{ ... }",
       "--target", "target.s",
-      "--out", "out.s",
       "--initial_instruction_number", "32",
       "--machine_output", "search.json",
-      "--failed_verification_action", "quit",
-      "--strategy", "none",
       "--cost", "correctness",
       "--reduction", "sum",
       "--misalign_penalty", "3",

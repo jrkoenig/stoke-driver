@@ -4,8 +4,8 @@ import threading, json, os, sys, gzip, random, time, pmap
 
 NUM_WORKERS = 4
 
-RUNS = 1
-TIMEOUT = 1*1000*1000
+RUNS = 5
+TIMEOUT = 20000000
 filename = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"
 log_prefix = filename if not filename.endswith(".jsonl") else filename[:-6]
 TARGET_DIR = os.path.abspath("./")
@@ -16,13 +16,11 @@ next = 0
 def save_result(f, l, runner, name, target):
     
     r = json.loads(runner.get_file("search.json"))
-    s = r["best_correct"] if r['success'] else r["best_yet"]
     output = {'iters': r["statistics"]["total_iterations"],
               'limit': TIMEOUT,
               'name': name,
-              'correct': r['success'], 'cost': s['cost'], 'asm': s['code'],
-              'elapsed': r["statistics"]["total_search_time"]}
-
+              'correct': r['success'], 'cost': r["current"]['cost'], 'asm': r["current"]['code'],
+              'elapsed': r["statistics"]["total_time"]}
     global next
     log_filename = ''
     lognum = 0
@@ -32,10 +30,13 @@ def save_result(f, l, runner, name, target):
         output ['log'] = lognum
         f.write(json.dumps(output,  separators=(',',':'), ensure_ascii=True)+"\n")
         f.flush()
-    for log, data in [("drops", runner.get_gz_file("drops.log"))]:
-        with open(os.path.join(LOG_DIR, name+"-"+str(lognum)+"-"+log+".gz"), 'wb') as logout:
-            if data is not None:
-                logout.write(data)
+    for capture in ["search.binlog"]:
+        gz_data = runner.get_gz_file(capture)
+        if gz_data is not None:
+            with open(os.path.join(LOG_DIR, name+"-"+str(lognum)+"-"+capture+".gz"), 'wb') as logout:
+                logout.write(gz_data)
+        else:
+            print "Could not save " + capture
 def main():
     targets = targetbuilder.make_all_from_c("gulwani/gulwani.json")
     filelock = threading.Lock()
@@ -47,8 +48,7 @@ def main():
             
             runner = stokerunner.StokeRunner()
             runner.setup(target)
-            runner.add_args(["--cycle_timeout", str(TIMEOUT),
-                             "--timeout_iterations", str(TIMEOUT)])
+            runner.add_args(["--timeout_iterations", str(TIMEOUT)])
             runner.launch()
             runner.wait()
             if runner.successful():
