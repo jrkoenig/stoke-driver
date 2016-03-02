@@ -44,7 +44,7 @@ class WorkTask(object):
                [self.series, json.dumps(output, separators=(',',':'), ensure_ascii=True)])
             (output_id,) = c.fetchone()
             
-            for capture in self.job["captures"]:
+            for capture in self.job["captures"] if 'captures' in self.job else []:
                 gz_data = runner.get_gz_file(capture)
                 if gz_data is not None:
                     c.execute("INSERT INTO distr_gz_captures(output, file, data) VALUES (%s,%s,%s)",
