@@ -23,6 +23,7 @@ class WorkTask(object):
             self.runner = stokerunner.StokeRunner(path)
             self.runner.setup(job['target'])
             self.runner.add_args(["--timeout_iterations", str(self.timeout)])
+            self.runner.add_args(job['args'])
             self.runner.launch()
             print "Started run of stoke"
         except:
