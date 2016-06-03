@@ -29,7 +29,7 @@ class StokeRunner(object):
 
         stdout = open(os.path.join(self.tdir,"stdout.out"), "w")
         stderr = open(os.path.join(self.tdir,"stderr.out"), "w")
-        self.proc = subprocess.Popen([self.stoke_bin, "searchexpt"] + self.args,
+        self.proc = subprocess.Popen([self.stoke_bin, "synthesize"] + self.args,
                                      cwd = self.tdir,
                                      stdout = stdout.fileno(),
                                      stderr = stderr.fileno())
@@ -57,7 +57,7 @@ class StokeRunner(object):
                 gstream.close()
                 return ostream.getvalue()
         except:
-            return None
+            raise
     def cleanup(self):
         try:
             if self.tdir != '':
@@ -73,10 +73,10 @@ def _mk_set(l):
 
 def build_args(target):
     return [
-      "--init", "zero",
+      #"--cpu_flags", "{ cmov sse sse2 popcnt }"
       "--testcases", "test.cases",
       "--target", "target.s",
-      "--initial_instruction_number", "32",
+      "--initial_instruction_number", "64",
       "--machine_output", "search.json",
       "--cost", "correctness",
       "--reduction", "sum",
@@ -84,6 +84,6 @@ def build_args(target):
       "--beta", "1.0",
       "--seed", "0",
       "--distance", "hamming",
-      "--sig_penalty", "100",
+      "--sig_penalty", "200",
       "--def_in", _mk_set(target.def_in),
-      "--live_out", _mk_set(target.live_out)]
+      "--live_out", _mk_set(target.live_out)] + (["--heap_out"] if target.use_mem else [])

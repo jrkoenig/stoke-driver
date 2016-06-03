@@ -2,10 +2,10 @@
 import stokerunner, synthtarget, stokeversion, targetbuilder
 import threading, json, os, sys, gzip, random, time, pmap
 
-NUM_WORKERS = 1
+NUM_WORKERS = 8
 
-RUNS = 1
-TIMEOUT = 1*1000*1000
+RUNS = 20
+TIMEOUT = 10000000
 filename = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"
 log_prefix = filename if not filename.endswith(".jsonl") else filename[:-6]
 TARGET_DIR = os.path.abspath("./")
@@ -16,13 +16,13 @@ next = 0
 def save_result(f, l, runner, name, target):
 
     r = json.loads(runner.get_file("search.json"))
-    s = r["current"]
+    print r
+    s = r["best_correct"] if r['success'] else r['best_yet']
     output = {'iters': r["statistics"]["total_iterations"],
               'limit': TIMEOUT,
               'name': name,
               'correct': r['success'], 'cost': s['cost'], 'asm': s['code'],
               'elapsed': r["statistics"]["total_time"]}
-
     global next
     log_filename = ''
     lognum = 0
@@ -32,36 +32,40 @@ def save_result(f, l, runner, name, target):
         output ['log'] = lognum
         f.write(json.dumps(output,  separators=(',',':'), ensure_ascii=True)+"\n")
         f.flush()
-    for log, data in [("search", runner.get_gz_file("search.binlog"))]:
-        if data is not None:
-            with open(os.path.join(LOG_DIR, name+"-"+str(lognum)+"-"+log+".gz"), 'wb') as logout:
-                logout.write(data)
+    for capture in []:
+        gz_data = runner.get_gz_file(capture)
+        if gz_data is not None:
+            with open(os.path.join(LOG_DIR, name+"-"+str(lognum)+"-"+capture+".gz"), 'wb') as logout:
+                logout.write(gz_data)
         else:
-            print "Could not get binlog file"
+            print "Could not save " + capture
+
 def main():
-    targets = targetbuilder.make_all_from_c("gulwani/gulwani.json")
+    targets = targetbuilder.make_all_from_c("benchmarks/database.json")
     filelock = threading.Lock()
 
     if not os.path.isdir(LOG_DIR):
        os.makedirs(LOG_DIR)
     with open(RESULTS_FILE,"w") as f:
         def run_trial((name, target)):
-
             runner = stokerunner.StokeRunner()
             runner.setup(target)
-            runner.add_args(["--timeout_iterations", str(TIMEOUT)])
+            runner.add_args(["--cycle_timeout", str(TIMEOUT),
+                                  "--timeout_iterations", str(TIMEOUT)])
+
             runner.launch()
             runner.wait()
             if runner.successful():
                 save_result(f, filelock, runner, name, target)
             else:
                 print "STOKE Failed on "+name+"!!!"
-                print runner.get_file("stderr.out")
                 print runner.get_file("stdout.out")
+                print runner.get_file("stderr.out")
             runner.cleanup()
 
-        progs = ['p{:02d}'.format(i+1) for i in range(25)]
-        progs = [(p,targets[p]) for p in progs if p != 'p19']
+        progs = targets.keys()
+        #progs = ['vincrement']
+        progs = [(p,targets[p]) for p in progs]
 
         print "Running on", NUM_WORKERS, "cores"
         print "Running ", RUNS, "times per program"
