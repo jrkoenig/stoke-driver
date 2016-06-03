@@ -52,10 +52,17 @@ def _compile(program_params):
         t = synthtarget.SynthTarget()
         t.testcases = tests_out
         t.target = func_s
-        t.live_out = _LINUX_ABI_RESULTS[:program_params['retc']]
-        t.def_in = _LINUX_ABI_ARGS[:program_params['argc']]
+        if 'live_out' in program_params:
+            t.live_out = program_params['live_out']
+        else:
+            t.live_out = _LINUX_ABI_RESULTS[:program_params['retc']]
+        if 'def_in' in program_params:
+            t.def_in = program_params['def_in']
+        else:
+            t.def_in = _LINUX_ABI_ARGS[:program_params['argc']]
         t.use_mem = program_params['use_mem']
         return t
     finally:
         if tdir != '':
             shutil.rmtree(tdir)
+            pass

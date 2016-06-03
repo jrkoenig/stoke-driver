@@ -74,6 +74,7 @@ def _mk_set(l):
 def build_args(target):
     return [
       "--init", "zero",
+      #"--cpu_flags", "{ cmov sse sse2 popcnt }"
       "--testcases", "test.cases",
       "--training_set", "{ ... }",
       "--target", "target.s",
@@ -85,6 +86,6 @@ def build_args(target):
       "--beta", "1",
       "--seed", "0",
       "--distance", "hamming",
-      "--sig_penalty", "100",
+      "--sig_penalty", "200",
       "--def_in", _mk_set(target.def_in),
-      "--live_out", _mk_set(target.live_out)]
+      "--live_out", _mk_set(target.live_out)] + (["--heap_out"] if target.use_mem else [])

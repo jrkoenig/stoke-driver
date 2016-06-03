@@ -2,10 +2,10 @@
 import stokerunner, synthtarget, stokeversion, targetbuilder
 import threading, json, os, sys, gzip, random, time, pmap
 
-NUM_WORKERS = 4
+NUM_WORKERS = 8
 
-RUNS = 5
-TIMEOUT = 20000000
+RUNS = 20
+TIMEOUT = 10000000
 filename = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"
 log_prefix = filename if not filename.endswith(".jsonl") else filename[:-6]
 TARGET_DIR = os.path.abspath("./")
@@ -38,14 +38,13 @@ def save_result(f, l, runner, name, target):
         else:
             print "Could not save " + capture
 def main():
-    targets = targetbuilder.make_all_from_c("gulwani/gulwani.json")
+    targets = targetbuilder.make_all_from_c("benchmarks/database.json")
     filelock = threading.Lock()
 
     if not os.path.isdir(LOG_DIR):
        os.makedirs(LOG_DIR)
     with open(RESULTS_FILE,"w") as f:
         def run_trial((name, target)):
-            
             runner = stokerunner.StokeRunner()
             runner.setup(target)
             runner.add_args(["--timeout_iterations", str(TIMEOUT)])
@@ -56,10 +55,13 @@ def main():
             else:
                 print "STOKE Failed on "+name+"!!!"
                 print runner.get_file("stderr.out")
+            
+            #print runner.get_file("stdout.out")
             runner.cleanup()
         
-        progs = ['p{:02d}'.format(i+1) for i in range(25)]
-        progs = [(p,targets[p]) for p in progs if p != 'p19']
+        progs = targets.keys()
+        #progs = ['vincrement']
+        progs = [(p,targets[p]) for p in progs]
         
         print "Running on", NUM_WORKERS, "cores"
         print "Running ", RUNS, "times per program"

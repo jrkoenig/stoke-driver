@@ -1,0 +1,94 @@
+[{
+  "src_file": "swap.cc",
+  "func": "swap",
+  "argc": 2,
+  "retc": 0,
+  "use_mem": true,
+  "name": "swap",
+  "tags": ["memory"]
+},{
+  "src_file": "merge-inner.cc",
+  "func": "inner",
+  "argc": 3,
+  "retc": 1,
+  "use_mem": true,
+  "name": "merge-inner",
+  "tags": ["memory", "conditional"]
+},{
+  "src_file": "vincrement.cc",
+  "func": "inc",
+  "argc": 2,
+  "retc": 0,
+  "use_mem": true,
+  "frame_file": "loop-frame.s",
+  "name": "vincrement",
+  "tags": ["memory", "loop"]
+},{
+  "src_file": "reverse.cc",
+  "func": "reverse",
+  "argc": 2,
+  "retc": 0,
+  "use_mem": true,
+  "frame_file": "loop-frame.s",
+  "name": "reverse",
+  "tags": ["memory", "loop"]
+},{
+  "src_file": "countzero.cc",
+  "func": "count_zero",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": true,
+  "frame_file": "loop-frame.s",
+  "name": "countzero",
+  "tags": ["memory", "loop"]
+},{
+  "src_file": "lists.cc",
+  "func": "list_reverse",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": true,
+  "frame_file": "loop-frame.s",
+  "name": "list_reverse",
+  "tags": ["memory", "loop"]
+},{
+  "src_file": "lists.cc",
+  "func": "list_max",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": true,
+  "frame_file": "loop-frame.s",
+  "name": "list_max",
+  "tags": ["memory", "loop"]
+},{
+  "src_file": "argmax.cc",
+  "func": "argmax",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "argmax",
+  "tags": ["conditional"]
+},{
+  "src_file": "argmax3.cc",
+  "func": "argmax3",
+  "argc": 3,
+  "retc": 1,
+  "use_mem": false,
+  "name": "argmax3",
+  "tags": ["conditional"]
+},{
+  "src_file": "transpose44.cc",
+  "func": "transpose44",
+  "live_out": ["%xmm0","%xmm1","%xmm2","%xmm3"],
+  "def_in": ["%xmm0","%xmm1","%xmm2","%xmm3"],
+  "use_mem": false,
+  "name": "transpose44",
+  "tags": ["vector"]
+},{
+  "src_file": "crossproduct.cc",
+  "func": "cross",
+  "live_out": ["%xmm0"],
+  "def_in": ["%xmm0","%xmm1","%rsp"],
+  "use_mem": false,
+  "name": "crossproduct",
+  "tags": ["vector"]
+}]
