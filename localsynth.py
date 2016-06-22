@@ -3,9 +3,9 @@ import stokerunner, stokeversion, targetbuilder
 import threading, json, os, sys, gzip, random, time, pmap
 from synthtarget import SynthTarget
 
-NUM_WORKERS = 4
+NUM_WORKERS = 8
 
-RUNS = 10
+RUNS = 100
 TIMEOUT = 500000
 filename = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"
 log_prefix = filename if not filename.endswith(".jsonl") else filename[:-6]
@@ -61,7 +61,7 @@ def main():
             runner = stokerunner.StokeRunner()
             runner.setup(target)
             runner.add_args(["--timeout_iterations", str(TIMEOUT)])
-            runner.add_args(["--double_mass", "1"])
+            runner.add_args(["--double_mass", "0"])
 
             runner.launch()
             runner.wait()
@@ -73,12 +73,15 @@ def main():
                 save_result(f, filelock, runner, name, target)
             else:
                 print "STOKE Failed on "+name+"!!!"
-                print runner.get_file("stdout.out")
+                #print runner.get_file("stdout.out")
                 print runner.get_file("stderr.out")
             runner.cleanup()
 
         progs = load_targets("targets/realworld")
-        progs = [(p,t) for (p,t) in progs if p not in ['send_bits.json', 'oggpack_write.json']]
+        progs_to_run = ['seed_chase.json','_vp_offset_and_mix.json','updcrc.json',
+                        '_vorbis_apply_window.json','add_pair_to_block.json',
+                        'longest_match.json','dradf2.json']
+        progs = [(p,t) for (p,t) in progs if p in progs_to_run]
         l = list(progs * RUNS)
 
         print "Running on", NUM_WORKERS, "cores"

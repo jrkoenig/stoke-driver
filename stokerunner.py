@@ -79,7 +79,7 @@ def build_args(target):
       "--machine_output", "search.json",
       "--cost", "correctness+latency",
       "--reduction", "sum",
-      "--cpu_flags", "{ sse2 }",
+      "--cpu_flags", "{ }",
       "--opc_blacklist", "{ btc.* btr.* bts.* crc32.* prefetch.* ver.* }",
       "--solver_timeout", "30000",
       "--misalign_penalty", "3",
