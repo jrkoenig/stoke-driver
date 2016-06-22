@@ -12,7 +12,7 @@
   "argc": 3,
   "retc": 1,
   "use_mem": true,
-  "name": "merge-inner",
+  "name": "merge_inner",
   "tags": ["memory", "conditional"]
 },{
   "src_file": "vincrement.cc",

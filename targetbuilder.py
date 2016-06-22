@@ -1,5 +1,5 @@
 import synthtarget
-import tempfile, shutil, os, json, subprocess
+import tempfile, shutil, os, json, subprocess, sys
 
 _J = os.path.join
 _LINUX_ABI_ARGS = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"]
@@ -66,3 +66,38 @@ def _compile(program_params):
         if tdir != '':
             shutil.rmtree(tdir)
             pass
+
+
+"""
+def main():
+    gulwani = make_all_from_c("gulwani/gulwani.json")
+    small_benchmarks = make_all_from_c("benchmarks/database.json")
+    for name,target in gulwani.items()+small_benchmarks.items():
+        print name
+        with open("targets/"+name+".json", "w") as f:
+            json.dump(target.to_json(), f)
+"""
+
+def main():
+    if len(sys.argv) != 4:
+        print "Usage: targetbuilder.py name path/to/target.s path/to/testcases.tc"
+        return
+    name = sys.argv[1]
+    target = synthtarget.SynthTarget()
+    target.target = _filecontents(sys.argv[2])
+    if target.target is None:
+        print "Could not open target file"
+        return
+    tcs = _filecontents(sys.argv[3])
+    if tcs is None:
+        print "Could not open testcases"
+        return
+    target.testcases = tcs
+    target.use_mem = True
+    target.live_out = None
+    target.def_in = None
+    with open(name+".json", "w") as f:
+        json.dump(target.to_json(), f)
+
+if __name__ == "__main__":
+    main()

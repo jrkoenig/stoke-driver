@@ -29,7 +29,7 @@ class StokeRunner(object):
 
         stdout = open(os.path.join(self.tdir,"stdout.out"), "w")
         stderr = open(os.path.join(self.tdir,"stderr.out"), "w")
-        self.proc = subprocess.Popen([self.stoke_bin, "synthesize"] + self.args,
+        self.proc = subprocess.Popen([self.stoke_bin, "optimize"] + self.args,
                                      cwd = self.tdir,
                                      stdout = stdout.fileno(),
                                      stderr = stderr.fileno())
@@ -41,7 +41,7 @@ class StokeRunner(object):
     def finished(self):
         return self.proc.poll() is not None
     def successful(self):
-        return self.proc.poll() == 0
+        return self.proc.poll() in [0,2]
     def get_file(self, fname):
         try:
             with open(os.path.join(self.tdir,fname), "r") as f:
@@ -76,14 +76,19 @@ def build_args(target):
       #"--cpu_flags", "{ cmov sse sse2 popcnt }"
       "--testcases", "test.cases",
       "--target", "target.s",
-      "--initial_instruction_number", "64",
       "--machine_output", "search.json",
-      "--cost", "correctness",
+      "--cost", "correctness+latency",
       "--reduction", "sum",
+      "--cpu_flags", "{ sse2 }",
+      "--opc_blacklist", "{ btc.* btr.* bts.* crc32.* prefetch.* ver.* }",
+      "--solver_timeout", "30000",
       "--misalign_penalty", "3",
       "--beta", "1.0",
       "--seed", "0",
       "--distance", "hamming",
-      "--sig_penalty", "200",
-      "--def_in", _mk_set(target.def_in),
-      "--live_out", _mk_set(target.live_out)] + (["--heap_out"] if target.use_mem else [])
+      "--strategy", "bounded",
+      "--failed_verification_action", "add_counterexample",
+      "--sig_penalty", "200"] +\
+      (["--def_in", _mk_set(target.def_in)] if target.def_in is not None else []) +\
+      (["--live_out", _mk_set(target.live_out)] if target.live_out is not None else []) +\
+      (["--heap_out"] if target.use_mem else [])

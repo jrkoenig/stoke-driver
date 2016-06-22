@@ -1,11 +1,12 @@
 
-import stokerunner, synthtarget, stokeversion, targetbuilder
+import stokerunner, stokeversion, targetbuilder
 import threading, json, os, sys, gzip, random, time, pmap
+from synthtarget import SynthTarget
 
-NUM_WORKERS = 8
+NUM_WORKERS = 4
 
-RUNS = 20
-TIMEOUT = 10000000
+RUNS = 10
+TIMEOUT = 500000
 filename = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"
 log_prefix = filename if not filename.endswith(".jsonl") else filename[:-6]
 TARGET_DIR = os.path.abspath("./")
@@ -16,12 +17,15 @@ next = 0
 def save_result(f, l, runner, name, target):
 
     r = json.loads(runner.get_file("search.json"))
-    print r
-    s = r["best_correct"] if r['success'] else r['best_yet']
+    #print r
+    s = r["best_correct"]
     output = {'iters': r["statistics"]["total_iterations"],
               'limit': TIMEOUT,
               'name': name,
-              'correct': r['success'], 'cost': s['cost'], 'asm': s['code'],
+              'verified': r['verified'], 'success': r['success'],
+              'starting_cost': r['starting_cost'],
+              'cost': s['cost'],
+              'asm': s['code'],
               'elapsed': r["statistics"]["total_time"]}
     global next
     log_filename = ''
@@ -40,8 +44,14 @@ def save_result(f, l, runner, name, target):
         else:
             print "Could not save " + capture
 
+def load_targets(folder):
+    targets = []
+    for a in os.listdir(folder):
+        j = json.load(open(os.path.join(folder, a)))
+        target = SynthTarget.from_json(j)
+        targets.append((a, target))
+    return targets
 def main():
-    targets = targetbuilder.make_all_from_c("benchmarks/database.json")
     filelock = threading.Lock()
 
     if not os.path.isdir(LOG_DIR):
@@ -50,12 +60,16 @@ def main():
         def run_trial((name, target)):
             runner = stokerunner.StokeRunner()
             runner.setup(target)
-            runner.add_args(["--cycle_timeout", str(TIMEOUT),
-                                  "--timeout_iterations", str(TIMEOUT)])
+            runner.add_args(["--timeout_iterations", str(TIMEOUT)])
+            runner.add_args(["--double_mass", "1"])
 
             runner.launch()
             runner.wait()
             if runner.successful():
+                print "STOKE finished on " + name
+                for line in runner.get_file("stdout.out").split("\n"):
+                    if line.endswith("is unsupported."):
+                        print line
                 save_result(f, filelock, runner, name, target)
             else:
                 print "STOKE Failed on "+name+"!!!"
@@ -63,14 +77,13 @@ def main():
                 print runner.get_file("stderr.out")
             runner.cleanup()
 
-        progs = targets.keys()
-        #progs = ['vincrement']
-        progs = [(p,targets[p]) for p in progs]
+        progs = load_targets("targets/realworld")
+        progs = [(p,t) for (p,t) in progs if p not in ['send_bits.json', 'oggpack_write.json']]
+        l = list(progs * RUNS)
 
         print "Running on", NUM_WORKERS, "cores"
-        print "Running ", RUNS, "times per program"
+        print "Running ", RUNS, "times per program, i.e.", len(l), "total"
         print "Writing to", RESULTS_FILE
-        l = list(progs * RUNS)
         results = pmap.pmap(run_trial, l, NUM_WORKERS)
 
 if __name__ == "__main__":
