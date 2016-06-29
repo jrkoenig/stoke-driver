@@ -29,7 +29,7 @@ class StokeRunner(object):
 
         stdout = open(os.path.join(self.tdir,"stdout.out"), "w")
         stderr = open(os.path.join(self.tdir,"stderr.out"), "w")
-        self.proc = subprocess.Popen([self.stoke_bin, "optimize"] + self.args,
+        self.proc = subprocess.Popen([self.stoke_bin, "synthesize"] + self.args,
                                      cwd = self.tdir,
                                      stdout = stdout.fileno(),
                                      stderr = stderr.fileno())
@@ -73,21 +73,20 @@ def _mk_set(l):
 
 def build_args(target):
     return [
-      #"--cpu_flags", "{ cmov sse sse2 popcnt }"
+      "--cpu_flags", "{ cmov sse sse2 popcnt }",
       "--testcases", "test.cases",
       "--target", "target.s",
       "--machine_output", "search.json",
-      "--cost", "correctness+latency",
+      "--cost", "correctness",
       "--reduction", "sum",
-      "--cpu_flags", "{ }",
-      "--opc_blacklist", "{ btc.* btr.* bts.* crc32.* prefetch.* ver.* }",
+      "--training_set", "{ ... }",
       "--solver_timeout", "30000",
       "--misalign_penalty", "3",
       "--beta", "1.0",
       "--seed", "0",
       "--distance", "hamming",
-      "--strategy", "bounded",
-      "--failed_verification_action", "add_counterexample",
+      "--strategy", "none",
+      "--failed_verification_action", "quit",
       "--sig_penalty", "200"] +\
       (["--def_in", _mk_set(target.def_in)] if target.def_in is not None else []) +\
       (["--live_out", _mk_set(target.live_out)] if target.live_out is not None else []) +\
