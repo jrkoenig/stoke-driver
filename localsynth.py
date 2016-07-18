@@ -3,9 +3,9 @@ import stokerunner, stokeversion, targetbuilder
 import threading, json, os, sys, gzip, random, time, pmap
 from synthtarget import SynthTarget
 
-NUM_WORKERS = 52
+NUM_WORKERS = 2
 
-RUNS = 250
+RUNS = 20
 TIMEOUT = 10000000
 filename = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"
 log_prefix = filename if not filename.endswith(".jsonl") else filename[:-6]
@@ -18,7 +18,7 @@ def save_result(f, l, runner, name, target):
 
     r = json.loads(runner.get_file("search.json"))
     #print r
-    s = r["best_correct"]
+    s = r["best_correct"] if r['success'] else r["best_yet"]
     output = {'iters': r["statistics"]["total_iterations"],
               'limit': TIMEOUT,
               'name': name,
@@ -78,7 +78,9 @@ def main():
                 print runner.get_file("stderr.out")
             runner.cleanup()
 
-        progs = load_targets("targets/gulwani")
+        progs = load_targets("targets/bit")
+        print progs[0]
+        progs = [(n,p) for (n,p) in progs if n == "gray8.json"]
         l = list(progs * RUNS)
 
         print "Running on", NUM_WORKERS, "cores"

@@ -19,22 +19,19 @@ def make_all_from_c(filename):
     database = {}
     with open(filename) as f:
         for entry in list(json.load(f)):
-              entry['src'] = _filecontents(abs_path(entry['src_file']))
               entry['use_mem'] = True if entry.get('use_mem', False) else False
-              database[entry['name']] = _compile(entry)
+              print "Compiling", entry['name']
+              database[entry['name']] = _compile(entry, root)
     return database
 
-def _compile(program_params):
+def _compile(program_params, root):
     tdir = ''
     try:
         tdir = tempfile.mkdtemp("-stoke-synth")
         program = _J(tdir, "program")
-        src_file = _J(tdir, "main.cc")
-        with open(src_file, "w") as f:
-            f.write(program_params['src'])
-            f.write('\n')
-        subprocess.check_call(["g++", "-std=c++11", "-O1", "-fno-inline", "-fomit-frame-pointer",
-                               src_file, "-o",  program])
+        src_file = program_params['src_file']
+        subprocess.check_call(["g++", "-std=c++11", "-O1", "-fno-inline", "-fomit-frame-pointer", "-fno-stack-protector",
+                               src_file, "-o",  program], cwd=root)
         subprocess.check_call(["stoke", "extract", "--in",  program, "--out", _J(tdir,"bins")])
         subprocess.check_call(["stoke", "testcase", "--bin", program, "--out", _J(tdir, "tests.out"),
                                "--fxn", program_params['func'], "--max_testcases", "1000"],
@@ -55,11 +52,11 @@ def _compile(program_params):
         if 'live_out' in program_params:
             t.live_out = program_params['live_out']
         else:
-            t.live_out = _LINUX_ABI_RESULTS[:program_params['retc']]
+            t.live_out = _LINUX_ABI_RESULTS[:program_params['retc']]+["%rsp"]
         if 'def_in' in program_params:
             t.def_in = program_params['def_in']
         else:
-            t.def_in = _LINUX_ABI_ARGS[:program_params['argc']]
+            t.def_in = _LINUX_ABI_ARGS[:program_params['argc']]+["%rsp"]
         t.use_mem = program_params['use_mem']
         return t
     finally:
@@ -68,13 +65,13 @@ def _compile(program_params):
             pass
 
 
-"""
 def main():
-    gulwani = make_all_from_c("gulwani/gulwani.json")
-    small_benchmarks = make_all_from_c("benchmarks/database.json")
-    for name,target in gulwani.items()+small_benchmarks.items():
+    #gulwani = make_all_from_c("gulwani/gulwani.json")
+    #small_benchmarks = make_all_from_c("benchmarks/database.json")
+    bits = make_all_from_c("targets/src/bit/database.json")
+    for name,target in bits.items():
         print name
-        with open("targets/"+name+".json", "w") as f:
+        with open("targets/bit/"+name+".json", "w") as f:
             json.dump(target.to_json(), f)
 """
 
@@ -99,5 +96,6 @@ def main():
     with open(name+".json", "w") as f:
         json.dump(target.to_json(), f)
 
+"""
 if __name__ == "__main__":
     main()

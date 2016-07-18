@@ -41,13 +41,13 @@ def get_iter_counts_jsonl(fname):
     for l in open(fname):
         result = json.loads(str(l.strip()), 'utf-8')
         n = result["name"]
-        i = int(result["iters"]) if result["correct"] else None
+        i = int(result["iters"]) if result["success"] else None
         if n in itercounts:
             itercounts[n].append(i)
         else:
             itercounts[n] = [i]
     return itercounts
-    
+
 def make_stoke_sim(timings, limit):
     times = [t for t in timings if t is not None and t < limit]
     nruns = len(timings)
@@ -58,7 +58,7 @@ def is_int(s):
         return True
     except ValueError:
         return False
-        
+
 def get_iter_counts(s):
     if s.endswith(".jsonl"):
         return get_iter_counts_jsonl(s)
@@ -68,12 +68,12 @@ def get_iter_counts(s):
         return {}
 def main():
     args = sys.argv[1:]
-    MAX = 20000000
+    MAX = 10000000
     itercounts = [get_iter_counts(s) for s in args]
     exp_scheme = lambda st: expsim.exponential(st, k = 2.0, T_0=100000)
     keys = set()
     for ic in itercounts: keys.update(ic.keys())
-    
+
     print ",".join(["name"] + [str(a) for a in args])
     for i in sorted(keys):
         print str(i)+",",

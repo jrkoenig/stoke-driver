@@ -1,0 +1,85 @@
+[{
+  "src_file": "gray8.cc",
+  "func": "gray",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "gray8"
+},{
+  "src_file": "gray.cc",
+  "func": "gray",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "gray32"
+},{
+  "src_file": "log2.cc",
+  "func": "log_2",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "log2"
+},{
+  "src_file": "morton.cc",
+  "func": "morton",
+  "argc": 2,
+  "retc": 1,
+  "use_mem": false,
+  "name": "morton"
+},{
+  "src_file": "perm.cc",
+  "func": "perm",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "perm"
+},{
+  "src_file": "rev32.cc",
+  "func": "rev32",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "rev32"
+},{
+  "src_file": "rev8.cc",
+  "func": "rev8",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "rev8"
+},{
+  "src_file": "revbytes.cc",
+  "func": "revbytes",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "revbytes"
+},{
+  "src_file": "zerobyte8.cc",
+  "func": "zerobyte",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "zerobyte8"
+},{
+  "src_file": "zerobyte16.cc",
+  "func": "zerobyte",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "zerobyte16"
+},{
+  "src_file": "zerobyte32.cc",
+  "func": "zerobyte",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "zerobyte32"
+},{
+  "src_file": "zerobyte64.cc",
+  "func": "zerobyte",
+  "argc": 1,
+  "retc": 1,
+  "use_mem": false,
+  "name": "zerobyte64"
+}]
