@@ -7,7 +7,7 @@ def run_trial(job):
     name = job['name']
     verbose = 'silent' not in job or not job['silent']
     runner = stokerunner.StokeRunner()
-    runner.setup(job['target'])
+    runner.setup(job['target'], job['init'] if 'init' in job else None)
     limit = job['limit']
     runner.add_args(["--timeout_iterations", str(limit)])
     runner.add_args(["--cycle_timeout", str(limit)])
@@ -62,4 +62,3 @@ def run_stoke_jobs(jsonl_file, jobs, NUM_WORKERS=2):
                 f.flush()
     r = pmap.pmap(run_and_save, jobs, NUM_WORKERS)
     f.close()
-

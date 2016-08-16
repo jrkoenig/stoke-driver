@@ -8,7 +8,7 @@ class StokeRunner(object):
         self.args = []
         self.stoke_bin = stoke_bin
 
-    def setup(self, target):
+    def setup(self, target, initial = None):
         assert target is not None
         try:
             self.tdir = tempfile.mkdtemp("-stoke-synth")
@@ -18,6 +18,11 @@ class StokeRunner(object):
             write_file("test.cases", target.testcases)
             write_file("target.s", target.target)
             self.add_args(build_args(target))
+            if initial is not None:
+                write_file("initial.s", initial)
+                self.add_args(['--init', 'previous','--previous', 'initial.s'])
+            else:
+                self.add_args(['--init', 'zero'])
 
         except:
             self.cleanup()
@@ -29,7 +34,7 @@ class StokeRunner(object):
 
         stdout = open(os.path.join(self.tdir,"stdout.out"), "w")
         stderr = open(os.path.join(self.tdir,"stderr.out"), "w")
-        self.proc = subprocess.Popen([self.stoke_bin, "synthesize"] + self.args,
+        self.proc = subprocess.Popen([self.stoke_bin, "search"] + self.args,
                                      cwd = self.tdir,
                                      stdout = stdout.fileno(),
                                      stderr = stderr.fileno())
