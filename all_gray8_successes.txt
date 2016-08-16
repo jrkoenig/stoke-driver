@@ -1,0 +1,406 @@
+===
+.gray:
+movzwl %di, %ecx
+shrb $0x1, %cl
+movzwl %cx, %eax
+xorl $0x40, %eax
+xorw %di, %cx
+cmpxchgl %ecx, %eax
+shrb $0x2, %al
+xorl %ecx, %eax
+sarl $0x1, %eax
+shrw $0x1, %ax
+xorl %ecx, %eax
+rcrb $0x1, %al
+sarw $0x1, %ax
+xorw %cx, %ax
+retq 
+===
+.gray:
+movsbq %dil, %rdx
+movq %rdi, %rax
+shrb $0x1, %dl
+xorb %dl, %al
+shrb $0x2, %dh
+xorb %al, %dh
+rcrb $0x1, %dh
+shrb $0x1, %dh
+xorb %al, %dh
+shrb $0x1, %dh
+shrb $0x1, %dh
+xorb %dl, %dh
+rcrb $0x1, %dh
+xorb %dh, %al
+retq 
+===
+.gray:
+movswl %di, %eax
+movsbl %spl, %ebx
+shrl $0x1, %edi
+xorb %dil, %al
+adcb $0xf8, %bh
+andb %al, %bh
+rclb $0xf0, %bh
+xorb %al, %bh
+sarl $0x1, %ebx
+rcrb $0x1, %bh
+xorb %al, %bh
+rcrw $0x1, %bx
+rcrw $0x1, %bx
+xorb %bh, %al
+retq 
+===
+.gray:
+movzbq %dil, %rdx
+sarl $0x1, %edi
+xorb %dl, %dil
+movzbq %dil, %rax
+orb %al, %dh
+shrw $0x2, %dx
+xorb %al, %dh
+shrb $0x1, %dh
+sarb $0x1, %dh
+xorb %dh, %al
+shrl $0x1, %eax
+sarq $0x1, %rax
+xorw %di, %ax
+retq 
+===
+.gray:
+movzbl %dil, %eax
+popcntw %di, %r10w
+sarw $0x1, %ax
+xorl %edi, %eax
+andw $0x1, %r10w
+sarl $0x2, %edi
+xorl %eax, %edi
+shrb $0x2, %dil
+xorl %eax, %edi
+rolw $0xfe, %di
+xorb %dil, %al
+andw $0xfffe, %ax
+xorb %r10b, %al
+retq 
+===
+.gray:
+movzbl %dil, %eax
+sarl $0x1, %edi
+xorw %di, %ax
+rcrb $0x1, %dil
+xorb %al, %dil
+movzbl %dil, %r12d
+rcrw $0x1, %r12w
+shrw $0x1, %r12w
+shrw $0x1, %r12w
+xorb %dil, %r12b
+sarq $0x1, %r12
+shrb $0x1, %r12b
+xorw %r12w, %ax
+retq 
+===
+.gray:
+movswl %di, %ebx
+sarw $0x1, %di
+xorb %dil, %bl
+movsbq %bl, %rax
+movb $0xfe, %ah
+andb %al, %ah
+rclb $0xf0, %ah
+xorb %al, %ah
+shrb $0x2, %ah
+xorb %al, %ah
+rcrb $0x1, %ah
+sarb $0x1, %ah
+xorb %ah, %bl
+xchgl %eax, %ebx
+retq 
+===
+.gray:
+movw %di, %cx
+shrw $0x1, %cx
+xorw %di, %cx
+cmovnow %cx, %di
+sarl $0x2, %edi
+xorw %cx, %di
+rcrl $0x1, %edi
+sarb $0x1, %dil
+xorw %cx, %di
+shrl $0x1, %edi
+sarb $0x1, %dil
+xorw %di, %cx
+movzwq %cx, %rax
+retq 
+===
+.gray:
+movzbq %dil, %rbx
+shrb $0x1, %bl
+setnp %r12b
+xorw %di, %bx
+adcb %bl, %bh
+shrb $0x2, %bh
+xorb %bl, %bh
+shrb $0x2, %bh
+xorb %bl, %bh
+movzbl %bh, %eax
+andw $0xfd, %ax
+rorq $0x1, %rax
+xorl %edi, %eax
+xorb %r12b, %al
+retq 
+===
+.gray:
+movswl %di, %eax
+sarl $0x1, %eax
+xorb %dil, %al
+shrl $0x1, %eax
+xorb %dil, %al
+rcrb $0x1, %al
+movzbl %spl, %ecx
+xorw %di, %ax
+xorb %al, %ch
+shrb $0x1, %ch
+sarw $0x1, %cx
+sarb $0x1, %ch
+sarb $0x1, %ch
+xorb %ch, %al
+retq 
+===
+.gray:
+movzbl %dil, %eax
+movzbq %dil, %rdx
+shrb $0x1, %al
+xorw %dx, %ax
+orb %al, %ah
+shrb $0x2, %ah
+xorb %al, %ah
+shrb $0x1, %ah
+xorb %ah, %dl
+rolw $0x6, %dx
+xorb %al, %dh
+movslq %edi, %rax
+shrb $0x1, %dh
+xorb %dh, %al
+retq 
+===
+.gray:
+movzwl %di, %eax
+shrl $0x1, %eax
+xorb %dil, %al
+movzbq %al, %r14
+shrb $0x1, %r14b
+sarq $0x1, %r14
+movslq %r14d, %r8
+rcrq $0x2, %r14
+xorb %r8b, %r14b
+shrw $0x4, %r8w
+xorb %r14b, %r8b
+xorl %r8d, %eax
+retq 
+===
+.gray:
+imull $0x10, %edi, %ebx
+movslq %edi, %rax
+andl $0xf9, %eax
+movsbl %bh, %edx
+xorw %dx, %di
+andw $0xf0, %dx
+sarl $0x1, %edx
+cmovngq %rdi, %rax
+shrb $0x2, %al
+xorb %dil, %al
+xorw %ax, %dx
+sarw $0x1, %dx
+xorw %dx, %ax
+retq 
+===
+.gray:
+movswq %di, %rbx
+sarw $0x1, %bx
+xorb %bl, %dil
+sarl $0x1, %ebx
+movzbq %dil, %rcx
+orb %cl, %ch
+shrw $0x6, %cx
+xorl %ebx, %edi
+movzbl %ch, %eax
+xorw %di, %ax
+shrb $0x3, %dil
+xorl %edi, %eax
+retq 
+===
+.gray:
+movzbl %dil, %eax
+shrq $0x1, %rax
+xorb %dil, %al
+shrb $0x1, %al
+xorb %dil, %al
+rcrb $0x1, %al
+xorw %di, %ax
+imulw $0x8, %ax, %cx
+shrw $0x1, %ax
+xorb %dil, %al
+xorb %ch, %al
+retq 
+===
+.gray:
+movq %rdi, %rax
+shrb $0x1, %al
+movsbq %dil, %rdx
+andb $0xfc, %dh
+rclb $0xf9, %dh
+xorw %di, %ax
+xorb %al, %dh
+shrb $0x2, %dh
+xorb %al, %dh
+rcrb $0x1, %dh
+shrw $0x1, %dx
+xorb %dh, %al
+rclb $0xfa, %al
+xorw %di, %ax
+retq 
+===
+.gray:
+movl %edi, %r8d
+addb $0x40, %dil
+movq $0x2, %rax
+mulb %r8b
+rcrb $0x1, %dil
+rcrw $0x1, %di
+xorl %r8d, %eax
+xorw %ax, %di
+rcrq $0x1, %rax
+shrl $0x3, %edi
+xorl %eax, %edi
+shrw $0x1, %di
+rorw $0x1, %di
+xorb %dil, %al
+retq 
+===
+.gray:
+movl %edi, %eax
+sarl $0x1, %edi
+xorl %eax, %edi
+rcrw $0x1, %di
+xorb %al, %dil
+shrl $0x1, %edi
+xorw %ax, %di
+shrb $0x1, %dil
+xorb %dil, %al
+rorl $0x4, %edi
+xorb %dil, %al
+retq 
+===
+.gray:
+movl %edi, %eax
+shrb $0x1, %al
+xorb %al, %dil
+cmovaw %di, %ax
+sarb $0x2, %al
+btrq $0x5, %rax
+adcb %ah, %ah
+xorw %ax, %di
+sarb $0xfe, %ah
+sarb $0x5, %al
+imull $0x10, %edi, %ebx
+xorb %bh, %al
+xorb %dil, %al
+retq 
+===
+.gray:
+movsbl %dil, %ecx
+rorw $0x1, %di
+xorb %cl, %dil
+shrb $0x7, %ch
+subb $0xc0, %cl
+movzbl %dil, %eax
+rorq $0xfb, %rcx
+xorb %al, %ch
+rorw $0x1, %cx
+shrw $0x1, %cx
+xorb %ch, %al
+rcrw $0x1, %ax
+sarl $0x1, %eax
+xorb %dil, %al
+retq 
+===
+.gray:
+movl $0x40, %r13d
+xorw %di, %r13w
+shrw $0x1, %di
+xorw $0x40, %di
+movswq %di, %rax
+xorl %r13d, %eax
+rcrq $0x2, %rax
+xorl %r13d, %edi
+xorb %dil, %al
+shrb $0x2, %al
+xorw %di, %ax
+rcrl $0x1, %eax
+sarb $0x1, %al
+xorb %dil, %al
+retq 
+===
+.gray:
+movzbq %dil, %rax
+shrb $0x1, %al
+seto %cl
+xorw %di, %ax
+movzbq %al, %rsi
+shrb $0x2, %sil
+xorw %si, %ax
+rorw $0x1, %si
+shrw $0x1, %si
+xorb %al, %sil
+xorb %cl, %dil
+sarw $0x1, %si
+xorb %sil, %dil
+movzbw %dil, %ax
+retq 
+===
+.gray:
+movswl %di, %eax
+movsbl %al, %edx
+andl $0x80, %edx
+shrl $0x1, %edi
+xorw %di, %ax
+movb %al, %dh
+andb $0xfe, %dh
+rclb $0x10, %dh
+xorb %al, %dh
+rolw $0xfe, %dx
+xorb %al, %dh
+shrb $0x1, %dh
+shrb $0x1, %dh
+xorb %dh, %al
+retq 
+===
+.gray:
+movswq %di, %rax
+sarw $0x4, %di
+cltd 
+xorb %dil, %al
+negb %dl
+sarw $0x1, %dx
+xorb %al, %dl
+sarw $0x1, %dx
+xorb %al, %dl
+rcrb $0x1, %dl
+xorw %ax, %dx
+shrq $0x1, %rdx
+xorb %dl, %al
+retq 
+===
+.gray:
+movl %edi, %eax
+shrl $0x1, %eax
+xorb %al, %dil
+xorl $0x40, %eax
+cmpxchgw %ax, %di
+shrb $0x2, %al
+xorl %edi, %eax
+sarq $0x2, %rax
+xorl %edi, %eax
+rclb $0xfa, %al
+sarw $0x1, %ax
+xorw %di, %ax
+retq 
