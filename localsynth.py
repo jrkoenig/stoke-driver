@@ -6,7 +6,7 @@ from synthtarget import SynthTarget
 NUM_WORKERS = 2
 
 RUNS = 20
-TIMEOUT = 10000000
+TIMEOUT = 1000000
 filename = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"
 log_prefix = filename if not filename.endswith(".jsonl") else filename[:-6]
 TARGET_DIR = os.path.abspath("./")
