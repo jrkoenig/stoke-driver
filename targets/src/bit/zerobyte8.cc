@@ -1,9 +1,9 @@
-
+['init']
 #include "common.h"
 extern "C" {
 uint32_t zerobyte(uint64_t v)
 {
-  return v & 0xFF == 0;
+  return (v & 0xFF) == 0;
 }
 }
 
