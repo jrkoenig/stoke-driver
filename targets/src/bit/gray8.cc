@@ -22,14 +22,7 @@ void testandprint(uint32_t i) {
 
 int main() {
   srand32(95362418);
-  for(int i = -5; i < 5; i++) {
+  for(int i = 0; i < 256; i++) {
     testandprint(i);
-    testandprint(i*2);
-    testandprint(i*5);
-  }
-  for(int i = 0; i < 30; i++) {
-    testandprint(rand32());
-    testandprint(rand32() & rand32());
-    testandprint(rand32() | rand32());
   }
 }

@@ -26,15 +26,12 @@ int main() {
     testandprint(i*2);
     testandprint(i*5);
   }
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 30; i++) {
     testandprint(rand32());
     testandprint(rand32() & rand32());
     testandprint(rand32() | rand32());
   }
-  for(int i = 0; i < 10; i++) {
-    testandprint(rand32()&0xFF);
-  }
-  for(int i = 0; i < 10; i++) {
-    testandprint(rand32()&0xFFFF);
+  for(int i = 0; i < 256; i++) {
+    testandprint(i);
   }
 }
