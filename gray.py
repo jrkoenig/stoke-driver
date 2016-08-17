@@ -1,7 +1,7 @@
 
 import synth, sys, json
 
-NUM_WORKERS = 2
+NUM_WORKERS = 52
 RUNS = 100
 TIMEOUT = 1000000
 RESULTS_FILE = sys.argv[1] if len(sys.argv) > 1 else "results.jsonl"

@@ -39,7 +39,8 @@ def analyze_result(job, runner):
               'cost': s['cost'],
               'code': s['code'],
               'elapsed': r["statistics"]["total_time"],
-              'extra_args': job['args']}
+              'extra_args': job['args'],
+              'log': runner.get_file("search.log")}
     return output
 
 def load_targets(directory):
