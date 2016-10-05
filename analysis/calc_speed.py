@@ -23,7 +23,6 @@ def median(l):
         return (a[len(a)/2] + a[len(a)/2-1])*0.5
 
 def get_iter_counts_jsonl(fname):
-    
     itercounts = {}
     for l in open(fname):
         result = json.loads(str(l.strip()), 'utf-8')
@@ -48,24 +47,10 @@ def is_int(s):
         return False
 
 def main():
-    args = sys.argv[1:]
-    MAX = 10000000
-    itercounts = [get_iter_counts_jsonl(s) for s in args]
-    exp_scheme = lambda st: expsim.exponential(st, k = 2.0, T_0=100000)
-    keys = set()
-    for ic in itercounts: keys.update(ic.keys())
-
-    print ",".join(["name"] + [str(a) for a in args])
-    for i in sorted(keys):
-        print str(i)+",",
-        for ic in itercounts:
-            if i in ic:
-                sim = make_stoke_sim(ic[i], MAX)
-                ET = expsim.run_stoke_sim(sim, exp_scheme)
-                print str(ET)+",",
-            else:
-                print ",",
-        print ""
+    for l in open("results.jsonl"):
+        j = json.loads(l)
+        if (j['elapsed'] > 5):
+            print j['iters']/j['elapsed']
 
 if __name__ == "__main__":
     main()

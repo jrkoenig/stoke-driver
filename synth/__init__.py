@@ -11,7 +11,7 @@ def run_trial(job):
     limit = job['limit']
     runner.add_args(["--timeout_iterations", str(limit)])
     runner.add_args(["--cycle_timeout", str(limit)])
-    runner.add_args(["--double_mass", "0"])
+    #runner.add_args(["--double_mass", "0"])
     runner.add_args(job['args'])
     runner.launch()
     runner.wait()
@@ -34,8 +34,9 @@ def analyze_result(job, runner):
     output = {'iters': r["statistics"]["total_iterations"],
               'limit': job['limit'],
               'name': job['name'],
-              'verified': r['verified'], 'success': r['success'],
-              'starting_cost': r['starting_cost'],
+              'verified': r['verified'],
+              'success': r['success'],
+              #'starting_cost': r['starting_cost'],
               'cost': s['cost'],
               'code': s['code'],
               'elapsed': r["statistics"]["total_time"],

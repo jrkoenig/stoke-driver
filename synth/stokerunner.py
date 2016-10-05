@@ -15,9 +15,13 @@ class StokeRunner(object):
             def write_file(fn, contents):
                 with open(os.path.join(self.tdir, fn), "w") as f:
                     f.write(contents)
-            write_file("test.cases", target.testcases)
-            write_file("target.s", target.target)
             self.add_args(build_args(target))
+            
+            tc = target.testcases
+            if tc != "":
+                write_file("test.cases", target.testcases)
+                self.add_args(["--testcases", "test.cases"])
+            write_file("target.s", target.target)
             if initial is not None:
                 write_file("initial.s", initial)
                 self.add_args(['--init', 'previous','--previous', 'initial.s'])
@@ -79,7 +83,6 @@ def _mk_set(l):
 def build_args(target):
     return [
       "--cpu_flags", "{ cmov sse sse2 popcnt }",
-      "--testcases", "test.cases",
       "--target", "target.s",
       "--machine_output", "search.json",
       "--cost", "correctness",
