@@ -56,11 +56,12 @@ def main():
     assert len(sys.argv) > 1
     for l in open(sys.argv[1]):
         if l.strip() != "":
-            i = int(l.strip())
+            [i,size] = l.strip().split(" ")
+            i = int(i)
             f = families[i]
-            initial_jobs.append({'name':str(i)+"-"+str(len(f.head.instrs)),'target':make_target(f.head),'limit': TIMEOUT, 'silent': False, 'args':['--generate_testcases']})
+            initial_jobs.append({'name':str(i)+"-"+str(size),'target':make_target(f.head),'limit': TIMEOUT, 'silent': False, 'args':['--generate_testcases']})
             
-    random.shuffle(initial_jobs)
+    #random.shuffle(initial_jobs)
     jobs = []
     print "Building jobs..."
     for job in initial_jobs:
