@@ -10,7 +10,7 @@ def run_trial(job):
     runner.setup(job['target'], job['init'] if 'init' in job else None)
     limit = job['limit']
     runner.add_args(["--timeout_iterations", str(limit)])
-    runner.add_args(["--cycle_timeout", str(limit)])
+    #runner.add_args(["--cycle_timeout", str(limit)])
     #runner.add_args(["--double_mass", "0"])
     runner.add_args(job['args'])
     runner.launch()
@@ -32,6 +32,7 @@ def analyze_result(job, runner):
     r = json.loads(runner.get_file("search.json"))
     s = r["best_correct"] if r['success'] else r["best_yet"]
     output = {'iters': r["statistics"]["total_iterations"],
+              'statistics':r['statistics'],
               'limit': job['limit'],
               'name': job['name'],
               'verified': r['verified'],

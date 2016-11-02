@@ -1,9 +1,10 @@
 
-import synth, sys, pickle, random
+import synth, sys, cPickle, random, threading, json
+from synth import pmap, stokerunner
 
-NUM_WORKERS = 2
-RUNS = 5
-TIMEOUT = 50*1000
+NUM_WORKERS = 28
+RUNS = 1
+TIMEOUT = 50*1000*1000
 RESULTS_FILE = sys.argv[2] if len(sys.argv) > 2 else "results.jsonl"
 
 class Target(object):
@@ -39,37 +40,76 @@ class Family(object):
         else:
             return False
 
+families = None
 
 def make_target(target):
     t = synth.SynthTarget()
     t.def_in = target.def_in
-    t.live_out = target.live_out
+    t.live_out = filter(lambda x: x != "%af", target.live_out)
     t.target = ".f:\n" + "\n".join(target.instrs) +"\nretq\n"
     t.testcases = ""
     return t
 
-def main():
-    print "Loading families..."
-    families = pickle.load(open("libs.families.pickle", "r"))
-    print "Picking assigned jobs..."
-    initial_jobs = []
-    assert len(sys.argv) > 1
-    for l in open(sys.argv[1]):
-        if l.strip() != "":
-            [i,size] = l.strip().split(" ")
-            i = int(i)
-            f = families[i]
-            initial_jobs.append({'name':str(i)+"-"+str(size),'target':make_target(f.head),'limit': TIMEOUT, 'silent': False, 'args':['--generate_testcases']})
-            
-    #random.shuffle(initial_jobs)
-    jobs = []
-    print "Building jobs..."
-    for job in initial_jobs:
-        jobs.extend([job]*RUNS)
+def run_trial(i):
+    job = {'name':str(i),'target':make_target(families[i].head),'limit': TIMEOUT, 'silent': True, 'args':['--generate_testcases']}
+    name = job['name']
+    verbose = 'silent' not in job or not job['silent']
+    runner = stokerunner.StokeRunner()
+    runner.setup(job['target'], job['init'] if 'init' in job else None)
+    limit = job['limit']
+    runner.add_args(["--timeout_iterations", str(limit)])
+    runner.add_args(["--timeout_seconds", str(900)])
+    runner.add_args(["--validator_must_support"])
+    #runner.add_args(["--cycle_timeout", str(limit)])
+    #runner.add_args(["--double_mass", "0"])
+    runner.add_args(job['args'])
+    runner.launch()
+    runner.wait()
+    
+    open("logs/"+str(i)+".stdout", "w").write(runner.get_file("stdout.out"))
+    open("logs/"+str(i)+".stderr", "w").write(runner.get_file("stderr.out"))
+    j = runner.get_file("search.json")
+    open("logs/"+str(i)+".json", "w").write(j if j is not None else "")
+    
+    if runner.successful():
+        print "STOKE finished on " + name
+        r = analyze_result(job, runner)
+    else:
+        print "STOKE Failed on "+name+"!!!"
+        r = {"name":name,"error":True}
+    runner.cleanup()
+    return r
 
+def analyze_result(job, runner):
+    r = json.loads(runner.get_file("search.json"))
+    output = {'iters': r["statistics"]["total_iterations"],
+              'examples': r["statistics"]["total_counterexamples"],
+              'name': job['name'],
+              'verified': r['verified']}
+    return output
+
+def run_stoke_jobs(jsonl_file, jobs, NUM_WORKERS=2):
+    f = open(jsonl_file, "w")
+    lock = threading.Lock()
+    def run_and_save(job):
+        r = run_trial(job)
+        if r is not None:
+            with lock:
+                f.write(json.dumps(r,  separators=(',',':'), ensure_ascii=True)+"\n")
+                f.flush()
+    r = pmap.pmap(run_and_save, jobs, NUM_WORKERS)
+    f.close()
+
+def main():
+    global families
+    print "Loading families..."
+    families = cPickle.load(open("libs.families.pickle", "r"))
+    print "Picking assigned jobs..."
+    jobs = [i for i,f in enumerate(families)]
+    random.shuffle(jobs)
     print "Running on", NUM_WORKERS, "cores"
     print "Running ", RUNS, "times per program, i.e.", len(jobs), "total"
     print "Writing to", RESULTS_FILE
-    synth.run_stoke_jobs(RESULTS_FILE, jobs, NUM_WORKERS)
+    run_stoke_jobs(RESULTS_FILE, jobs, NUM_WORKERS)
 
 main()

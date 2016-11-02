@@ -1,5 +1,5 @@
 
-import subprocess, shutil, tempfile, os, io, gzip
+import subprocess, shutil, tempfile, os, io, gzip, time
 
 class StokeRunner(object):
     def __init__(self, stoke_bin = 'stoke'):
@@ -46,7 +46,8 @@ class StokeRunner(object):
         stderr.close()
 
     def wait(self):
-        return self.proc.wait()
+        while not self.finished():
+            time.sleep(1)
     def finished(self):
         return self.proc.poll() is not None
     def successful(self):
@@ -93,8 +94,8 @@ def build_args(target):
       "--beta", "1.0",
       "--seed", "0",
       "--distance", "hamming",
-      "--strategy", "none",
-      "--failed_verification_action", "quit",
+      "--strategy", "bounded",
+      "--failed_verification_action", "add_counterexample",
       "--sig_penalty", "200"] +\
       (["--def_in", _mk_set(target.def_in)] if target.def_in is not None else []) +\
       (["--live_out", _mk_set(target.live_out)] if target.live_out is not None else []) +\

@@ -1,4 +1,4 @@
-import pg, targetbuilder, tempfile
+import tempfile
 import json, math, sys, random, subprocess, os
 
 def get_rewrites_server(conn, series):
