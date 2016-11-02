@@ -72,7 +72,7 @@ def make_target(target):
     return t
 
 def stoke_tasks():
-    families = FamilyLoader("libs.families")
+    families = FamilyLoader("targets/libs.families")
     jobs = list(range(len(families)))
     random.shuffle(jobs)
     output_file = open("r.jsonl", "w")
