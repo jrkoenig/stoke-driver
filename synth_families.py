@@ -31,9 +31,11 @@ class StokeTask(object):
         self.runner = stokerunner.StokeRunner()
         runner = self.runner
         runner.setup(self.target, None)
-        runner.add_args(["--timeout_iterations", str(50000000)])
-        runner.add_args(["--timeout_seconds", str(60)])
+        runner.add_args(["--timeout_iterations", str(10*1000*1000)])
+        runner.add_args(["--cycle_timeout", str(10*1000*1000)])
+        runner.add_args(["--timeout_seconds", str(2000)])
         runner.add_args(["--validator_must_support"])
+        runner.add_args(["--no_relax_reg"])
         runner.add_args(["--generate_testcases"])
         runner.launch()
     def kill(self):
@@ -73,13 +75,13 @@ def make_target(target):
 
 def stoke_tasks():
     families = FamilyLoader("targets/libs.families")
-    jobs = list(range(len(families)))
-    random.shuffle(jobs)
+    jobs = map(int,open("1000progs_filtered.txt").read().split("\n"))
     output_file = open("r.jsonl", "w")
     for i in jobs:
         yield StokeTask(i, make_target(families[i].head), output_file)
+    
 
 def main():
-    run_tasks(stoke_tasks(), 2)
+    run_tasks(stoke_tasks(), 28)
 
 main()

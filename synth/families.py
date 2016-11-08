@@ -1,5 +1,5 @@
 
-import json, struct
+import json, struct, sys
 
 class Target(object):
     def __init__(self, di, lo, instrs):
@@ -84,9 +84,8 @@ def _main():
     save_families(families, "libs.families")
     
 def _test():
-    loader = FamilyLoader("libs.families")
-    print "len is", len(loader)
-    c = 0
-    for i in loader:
-        c += i.head.size()
-    print "total size is", c
+    loader = FamilyLoader("targets/libs.families")
+    for i in sys.argv[1:]:
+        print loader[int(i)]
+if __name__ == "__main__":
+    _test()
