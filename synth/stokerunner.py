@@ -86,7 +86,7 @@ def build_args(target):
       "--cpu_flags", "{ cmov sse sse2 popcnt }",
       "--target", "target.s",
       "--machine_output", "search.json",
-      "--cost", "correctness",
+      #"--cost", "correctness",
       "--reduction", "sum",
       "--training_set", "{ ... }",
       "--solver_timeout", "30000",

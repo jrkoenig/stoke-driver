@@ -1,5 +1,5 @@
 
-import time, random, cPickle, json, synth
+import time, random, cPickle, json, synth, sys
 from synth import stokerunner
 from synth.families import FamilyLoader
 
@@ -23,19 +23,19 @@ def run_tasks(task_producer, max_tasks = 2):
             
 
 class StokeTask(object):
-    def __init__(self, i, target, out):
+    def __init__(self, i, target, out, args = []):
         self.i = i
         self.target = target
         self.output_file = out
+        self.extra_args = args
     def start(self):
         self.runner = stokerunner.StokeRunner()
         runner = self.runner
         runner.setup(self.target, None)
-        runner.add_args(["--timeout_iterations", str(10*1000*1000)])
-        runner.add_args(["--cycle_timeout", str(10*1000*1000)])
-        runner.add_args(["--timeout_seconds", str(2000)])
+        runner.add_args(["--timeout_iterations", "1000000000"])
+        runner.add_args(["--timeout_seconds", str(200000)])
         runner.add_args(["--validator_must_support"])
-        runner.add_args(["--no_relax_reg"])
+        runner.add_args(self.extra_args)
         runner.add_args(["--generate_testcases"])
         runner.launch()
     def kill(self):
@@ -45,8 +45,8 @@ class StokeTask(object):
             return False
         runner = self.runner
         
-        open("logs/"+str(self.i)+".stdout", "w").write(runner.get_file("stdout.out"))
-        open("logs/"+str(self.i)+".stderr", "w").write(runner.get_file("stderr.out"))
+        #open("logs/"+str(self.i)+".stdout", "w").write(runner.get_file("stdout.out"))
+        #open("logs/"+str(self.i)+".stderr", "w").write(runner.get_file("stderr.out"))
         j = runner.get_file("search.json")
         open("logs/"+str(self.i)+".json", "w").write(j if j is not None else "")
         
@@ -59,6 +59,7 @@ class StokeTask(object):
                       'verified': r['verified']}
         else:
             print "STOKE Failed on", self.i
+            print runner.get_file("stderr.out")
             r = {"name":self.i,"error":True}
         runner.cleanup()
         self.output_file.write(json.dumps(r,  separators=(',',':'), ensure_ascii=True)+"\n")
@@ -73,15 +74,26 @@ def make_target(target):
     t.testcases = ""
     return t
 
-def stoke_tasks():
+def stoke_tasks(outfile, args):
     families = FamilyLoader("targets/libs.families")
     jobs = map(int,open("1000progs_filtered.txt").read().split("\n"))
-    output_file = open("r.jsonl", "w")
+    output_file = open(outfile, "w")
     for i in jobs:
-        yield StokeTask(i, make_target(families[i].head), output_file)
+        yield StokeTask(i, make_target(families[i].head), output_file, args)
     
 
+arguments = {"walk": ["--no_relax_reg", "--cost", "correctness > 0", "--cycle_timeout", "10000000"],
+             "hamming": ["--no_relax_reg", "--cost", "correctness", "--cycle_timeout", "10000000"],
+             "misalign": ["--cost", "correctness", "--cycle_timeout", "10000000"],
+             "exponential": ["--cost", "correctness","--cycle_timeout", "10000,20000,40000,80000,160000,320000,640000,1280000,2560000,5120000,10240000,20480000,40960000"],
+             "gadgets": ["--cost", "correctness","--double_mass", "3", "--cycle_timeout", "10000,20000,40000,80000,160000,320000,640000,1280000,2560000,5120000"]
+            }
 def main():
-    run_tasks(stoke_tasks(), 28)
+    assert len(sys.argv) == 3
+    outfile = sys.argv[1]
+    kind = sys.argv[2]
+    assert kind in arguments
+    args = arguments[kind]
+    run_tasks(stoke_tasks(outfile, args), 28)
 
 main()
