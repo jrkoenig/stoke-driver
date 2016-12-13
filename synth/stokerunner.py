@@ -92,7 +92,6 @@ def build_args(target):
       "--solver_timeout", "30000",
       "--misalign_penalty", "3",
       "--beta", "1.0",
-      "--seed", "0",
       "--distance", "hamming",
       "--strategy", "bounded",
       "--failed_verification_action", "add_counterexample",
