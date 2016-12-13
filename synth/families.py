@@ -82,6 +82,14 @@ def _main():
     import pickle
     families = pickle.load(open("libs.families.pickle"))
     save_families(families, "libs.families")
+def main():
+    import sys
+    loader = FamilyLoader("targets/libs.families")
+    for a in sys.argv[1:]:
+        print str(loader[int(a)]).replace(";","\n").replace("{","\n").replace("}","\n")
+
+if __name__ == "__main__":
+    main()
     
 def _test():
     loader = FamilyLoader("targets/libs.families")
