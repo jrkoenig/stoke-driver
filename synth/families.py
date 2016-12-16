@@ -86,14 +86,9 @@ def main():
     import sys
     loader = FamilyLoader("targets/libs.families")
     for a in sys.argv[1:]:
+        print int(a), "="
         print str(loader[int(a)]).replace(";","\n").replace("{","\n").replace("}","\n")
 
 if __name__ == "__main__":
     main()
-    
-def _test():
-    loader = FamilyLoader("targets/libs.families")
-    for i in sys.argv[1:]:
-        print loader[int(i)]
-if __name__ == "__main__":
-    _test()
+
