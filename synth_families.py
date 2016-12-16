@@ -32,7 +32,7 @@ class StokeTask(object):
         self.runner = stokerunner.StokeRunner()
         runner = self.runner
         runner.setup(self.target, None)
-        runner.add_args(["--timeout_iterations", "500000000"])
+        runner.add_args(["--timeout_iterations", "10000000"])
         runner.add_args(["--timeout_seconds", str(60*60*24*2)])
         runner.add_args(["--validator_must_support"])
         runner.add_args(self.extra_args)
@@ -74,27 +74,25 @@ def make_target(target):
     t.testcases = ""
     return t
 
-def stoke_tasks(jobfile, outfile, args):
-    families = FamilyLoader("targets/libs.families")
-    jobs = map(int,open(jobfile).read().split("\n"))
-    output_file = open(outfile, "w")
-    for i in jobs:
-        yield StokeTask(i, make_target(families[i].head), output_file, args)
-    
-
 arguments = {"walk": ["--no_relax_reg", "--cost", "correctness > 0", "--cycle_timeout", "10000000"],
              "hamming": ["--no_relax_reg", "--cost", "correctness", "--cycle_timeout", "10000000"],
              "misalign": ["--cost", "correctness", "--cycle_timeout", "10000000"],
              "exponential": ["--cost", "correctness","--cycle_timeout", ",".join(map(str,[(1<<i) * 10000 for i in range(20)]))],
              "gadgets": ["--cost", "correctness","--double_mass", "3", "--cycle_timeout", ",".join(map(str,[(1<<i) * 10000 for i in range(20)]))]
             }
+def stoke_tasks(jobfile, outfile):
+    families = FamilyLoader("targets/libs.families")
+    jobs = open(jobfile).read().split("\n")
+    output_file = open(outfile, "w")
+    for line in jobs:
+        [i,args] = line.split(',')
+        yield StokeTask(line, make_target(families[int(i)].head), output_file, arguments[args])
+    
+
 def main():
-    assert len(sys.argv) == 4
-    outfile = sys.argv[1]
-    kind = sys.argv[2]
-    jobfile = sys.argv[3]
-    assert kind in arguments
-    args = arguments[kind]
-    run_tasks(stoke_tasks(jobfile, outfile, args), 50)
+    assert len(sys.argv) == 3
+    jobfile = sys.argv[1]
+    outfile = sys.argv[2]
+    run_tasks(stoke_tasks(jobfile, outfile), 50)
 
 main()
