@@ -45,7 +45,7 @@ class StokeTask(object):
             return False
         runner = self.runner
         
-        #open("logs/"+str(self.i)+".stdout", "w").write(runner.get_file("stdout.out"))
+        open("logs/"+str(self.i)+".log.gz", "w").write(runner.get_gz_file("search.log"))
         #open("logs/"+str(self.i)+".stderr", "w").write(runner.get_file("stderr.out"))
         j = runner.get_file("search.json")
         open("logs/"+str(self.i)+".json", "w").write(j if j is not None else "")
@@ -55,6 +55,7 @@ class StokeTask(object):
             r = json.loads(j)
             r = {'iters': r["statistics"]["total_iterations"],
                       'examples': r["statistics"]["total_counterexamples"],
+                      'total_search_time': r["statistics"]["total_search_time"],
                       'name': self.i,
                       'verified': r['verified']}
         else:
@@ -84,15 +85,13 @@ def stoke_tasks(jobfile, outfile):
     families = FamilyLoader("targets/libs.families")
     jobs = open(jobfile).read().split("\n")
     output_file = open(outfile, "w")
-    for line in jobs:
-        [i,args] = line.split(',')
-        yield StokeTask(line, make_target(families[int(i)].head), output_file, arguments[args])
+    for i, line in enumerate(jobs*1000):
+        yield StokeTask(i, make_target(families[int(line)].head), output_file,  ["--no_relax_reg", "--cost", "correctness", "--cycle_timeout", "10000000"])
     
 
 def main():
-    assert len(sys.argv) == 3
     jobfile = sys.argv[1]
     outfile = sys.argv[2]
-    run_tasks(stoke_tasks(jobfile, outfile), 50)
+    run_tasks(stoke_tasks(jobfile, outfile),4)
 
 main()

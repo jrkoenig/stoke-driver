@@ -93,8 +93,10 @@ def build_args(target):
       "--misalign_penalty", "3",
       "--beta", "1.0",
       "--distance", "hamming",
-      "--strategy", "bounded",
-      "--failed_verification_action", "add_counterexample",
+      #"--strategy", "bounded",
+      "--strategy", "none",
+      #"--failed_verification_action", "add_counterexample",
+      "--failed_verification_action", "quit",
       "--sig_penalty", "200"] +\
       (["--def_in", _mk_set(target.def_in)] if target.def_in is not None else []) +\
       (["--live_out", _mk_set(target.live_out)] if target.live_out is not None else []) +\
