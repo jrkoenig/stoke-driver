@@ -95,7 +95,6 @@ def stoke_tasks():
     
 def main():
     global hostname, conn
-    conn = httplib.HTTPConnection("localhost:8080")
     hostname = socket.gethostname()
     if len(sys.argv) > 1:
         conn = httplib.HTTPConnection(sys.argv[1])
