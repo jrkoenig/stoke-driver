@@ -1,5 +1,5 @@
 
-args = ["--timeout_iterations", "10000000","--timeout_seconds", str(60*60*24*2),"--validator_must_support","--generate_testcases"]
+args = ["--timeout_iterations", "100000","--timeout_seconds", str(60*60*24*2),"--validator_must_support","--generate_testcases"]
 targets = [229810,105886,197933,66217,227723,82322,147378]
 
 class JobSource(object):
@@ -31,8 +31,7 @@ class JobManager(object):
     def get(self, s):
         with self.lock:
             if len(self.notstarted) > 0:
-                n = self.notstarted.items()[0]
-                self.notstarted.remove(n)
+                n = self.notstarted.pop()
                 d = self.inflight[n][1]
             elif len(self.source) > 0:
                 n, d = self.source.pop()
@@ -138,7 +137,7 @@ def cleanup():
         time.sleep(5)
         jobs.cleanup()
 if __name__ == '__main__':
-    server = ThreadedHTTPServer(('localhost', 8080), GetHandler)
+    server = ThreadedHTTPServer(('', 8080), GetHandler)
     thread = threading.Thread(target = cleanup)
     thread.start()
     print 'Starting server, use <Ctrl-C> to stop'
