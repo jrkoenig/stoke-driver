@@ -52,15 +52,16 @@ def run_tasks(task_producer, max_tasks = 2):
             while have_more and len(outstanding) < max_tasks:
                 try:
                     t = next(task_producer)
-                    t.start()
-                    outstanding.append(t)
+                    if t is not None:
+                        t.start()
+                        outstanding.append(t)
                 except StopIteration:
                     have_more = False
             time.sleep(0.1)
             
             outstanding = filter(lambda t: not t.finished(), outstanding)
             now = time.time()
-            if now - last_heartbeat > 10:
+            if now - last_heartbeat > 5:
                 conn.request("POST", "/heartbeat?server="+hostname)
                 resp = conn.getresponse()
                 last_heartbeat = now
@@ -72,18 +73,25 @@ def run_tasks(task_producer, max_tasks = 2):
 
 def stoke_tasks():
     families = FamilyLoader("targets/libs.families")
+    last_empty = time.time()
+    wait = 0
     while True:
-        conn.request("POST", "/job/get?server="+hostname)
-        resp = conn.getresponse()
-        if resp.status != 200:
-            print "Error from server"
+        if time.time() - last_empty < wait:
+            yield None
         else:
-            jobs = json.loads(resp.read())
-            if len(jobs) == 0:
-                time.sleep(random.uniform(10,20))
+            conn.request("POST", "/job/get?server="+hostname)
+            resp = conn.getresponse()
+            if resp.status != 200:
+                print "Error from server"
             else:
-                (name, desc) = jobs[0]
-                yield StokeTask(name, families, desc)
+                jobs = json.loads(resp.read())
+                if len(jobs) == 0:
+                    last_empty = time.time()
+                    wait = random.uniform(0,10)
+                    continue
+                else:
+                    (name, desc) = jobs[0]
+                    yield StokeTask(name, families, desc)
     
 def main():
     global hostname, conn
@@ -97,7 +105,7 @@ def main():
         threads = int(sys.argv[2])
     else:
         threads = 1
-    hostname += "-{:x}".format(random.randint(0,2**32))
+    hostname += "-{:x}".format(random.randint(0,2**24))
     run_tasks(stoke_tasks(), threads)
 
 main()
