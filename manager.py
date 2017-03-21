@@ -4,7 +4,7 @@ targets = [229810,105886,197933,66217,227723,82322,147378]
 
 class JobSource(object):
     def __init__(self):
-        self.l = [("{:06d}".format(i), {'target': targets[3], 'args': args+['--seed',str(i+1)]}) for i in range(7)]
+        self.l = [("{:06d}".format(i), {'target': targets[i%len(targets)], 'args': args+['--seed',str(i+1)]}) for i in range(len(targets)*100)]
     def pop(self):
         n = self.l[0]
         self.l = self.l[1:]
