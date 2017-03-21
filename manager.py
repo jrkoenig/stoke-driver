@@ -1,10 +1,10 @@
 
-args = ["--timeout_iterations", "100000","--timeout_seconds", str(60*60*24*2),"--validator_must_support","--generate_testcases"]
+args = ["--cost", 'correctness', "--timeout_iterations", "10000000","--timeout_seconds", str(60*60*24*2), "--validator_must_support","--generate_testcases"]
 targets = [229810,105886,197933,66217,227723,82322,147378]
 
 class JobSource(object):
     def __init__(self):
-        self.l = [("{:06d}".format(i), {'target': targets[i%len(targets)], 'args': args}) for i in range(10000)]
+        self.l = [("{:06d}".format(i), {'target': targets[3], 'args': args+['--seed',str(i)]}) for i in range(7)]
     def pop(self):
         n = self.l[0]
         self.l = self.l[1:]
@@ -14,6 +14,7 @@ class JobSource(object):
 
 import threading
 import status
+import sys
 
 
 class JobManager(object):
@@ -24,7 +25,7 @@ class JobManager(object):
         self.completed = {}
         self.source = JobSource()
         self.lock = threading.Lock()
-    
+
     def mark_alive(self, server):
         with self.lock:
             self.servers_last_seen[server] = time.time()
@@ -61,7 +62,7 @@ class JobManager(object):
                         self.notstarted.add(job)
                 for server in dead_servers:
                     del self.servers_last_seen[server]
-        
+
 jobs = JobManager()
 
 from BaseHTTPServer import BaseHTTPRequestHandler
@@ -92,7 +93,7 @@ def completejob(req, path, query):
         req.send_response(200)
     else:
         req.send_response(500)
-    
+
 def statusoverview(req, path, query):
     send_string(req, status.overview(jobs))
 def statusjob(req, path, query):
@@ -137,7 +138,8 @@ def cleanup():
         time.sleep(5)
         jobs.cleanup()
 if __name__ == '__main__':
-    server = ThreadedHTTPServer(('', 8080), GetHandler)
+    port = 8080 if len(sys.argv) <= 1 else int(sys.argv[1])
+    server = ThreadedHTTPServer(('', port), GetHandler)
     thread = threading.Thread(target = cleanup)
     thread.start()
     print 'Starting server, use <Ctrl-C> to stop'
