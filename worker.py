@@ -55,6 +55,8 @@ def run_tasks(task_producer, max_tasks = 2):
                     if t is not None:
                         t.start()
                         outstanding.append(t)
+                    else:
+                        break
                 except StopIteration:
                     have_more = False
             time.sleep(0.1)
@@ -87,8 +89,8 @@ def stoke_tasks():
                 jobs = json.loads(resp.read())
                 if len(jobs) == 0:
                     last_empty = time.time()
-                    wait = random.uniform(0,10)
-                    continue
+                    wait = random.uniform(5,20)
+                    yield None
                 else:
                     (name, desc) = jobs[0]
                     yield StokeTask(name, families, desc)
