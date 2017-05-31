@@ -1,29 +1,47 @@
 
-import sqlite3, json
+import json, sys
+from synth.families import FamilyLoader
+import synth
 
+args = ["--cost", 'correctness', "--timeout_iterations", "10000000","--interrupt_after", str(60), "--validator_must_support","--generate_testcases"]
+args += [#"--cost", "correctness",
+"--reduction", "sum",
+"--training_set", "{ ... }",
+"--solver_timeout", "30000",
+"--misalign_penalty", "3",
+"--beta", "1.0",
+"--distance", "hamming",
+#"--strategy", "bounded",
+"--strategy", "none",
+#"--failed_verification_action", "add_counterexample",
+"--failed_verification_action", "quit",
+"--sig_penalty", "200",
+"--cpu_flags", "{ cmov sse sse2 popcnt }"]
 
-def main():
-    con = sqlite3.connect("job.sqlite")
-    cur = con.cursor()
-    cur.execute("CREATE TABLE `jobs` (\
-        `job`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,\
-        `config`	TEXT NOT NULL)")
-    cur.execute("CREATE TABLE `notstarted` (\
-        `job`	INTEGER NOT NULL UNIQUE,\
-        FOREIGN KEY(`job`) REFERENCES `jobs.job`)")
-    cur.execute("CREATE TABLE `running` (\
-        `job`	INTEGER NOT NULL UNIQUE,\
-        `server`	TEXT NOT NULL,\
-        FOREIGN KEY(`job`) REFERENCES `jobs.job`)")
+targets = []
+for l in open("1000progs_filtered.txt"):
+    try:
+        targets.append(int(l.strip()))
+    except ValueError:
+        break
+l = [{'target': targets[i%len(targets)], 'args': args+['--seed',str(i+1)]} for i in range(len(targets)*5)]
+
+families = FamilyLoader("targets/libs.families")
+
+def make_target(target):
+    t = synth.SynthTarget()
+    t.def_in = target.def_in
+    t.live_out = filter(lambda x: x != "%af", target.live_out)
+    t.target = ".f:\n" + "\n".join(target.instrs) +"\nretq\n"
+    t.testcases = ""
+    return t
     
-    args = ["--cost", 'correctness', "--timeout_iterations", "10000000","--timeout_seconds", str(60*60*24*2), "--validator_must_support","--generate_testcases"]
-    targets = [229810,105886,197933,66217,227723,82322,147378]
-    l = [json.dumps({'target': targets[i%len(targets)], 'args': args+['--seed',str(i+1)]}) for i in range(len(targets)*100)]
+jsonl = open("jobs.jsonl","w")
+for i,j in enumerate(l):
+    target = make_target(families[int(j['target'])].head).to_json()
+    run_desc = {'run':str(j['target'])+"("+str(i)+")", 'args': j['args'], 'target': target, 'log_files': ['search.json']}
     
-    for config in l:
-        con.execute("INSERT INTO jobs (config) VALUES (?)", (config,))
-    con.commit()
+    #with open("data/config/"+str(i)+".json","w") as f:
+    #    f.write(json.dumps(run_desc, indent=2))
+    jsonl.write(json.dumps(run_desc,separators=(',',':'))+"\n")
     
-    con.close()
-    
-main()
