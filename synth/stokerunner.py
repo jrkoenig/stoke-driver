@@ -8,7 +8,7 @@ class StokeRunner(object):
         self.args = []
         self.stoke_bin = stoke_bin
 
-    def setup(self, target, initial = None):
+    def setup(self, target, initial = None, state = None):
         assert target is not None
         try:
             self.tdir = tempfile.mkdtemp("-stoke-synth")
@@ -19,9 +19,12 @@ class StokeRunner(object):
             
             tc = target.testcases
             if tc != "":
-                write_file("test.cases", target.testcases)
+                write_file("test.cases", tc)
                 self.add_args(["--testcases", "test.cases"])
             write_file("target.s", target.target)
+            if state is not None:
+                write_file("a.state", state)
+                self.add_args(['--restore_state', 'a.state'])
             if initial is not None:
                 write_file("initial.s", initial)
                 self.add_args(['--init', 'previous','--previous', 'initial.s'])
@@ -38,7 +41,7 @@ class StokeRunner(object):
 
         stdout = open(os.path.join(self.tdir,"stdout.out"), "w")
         stderr = open(os.path.join(self.tdir,"stderr.out"), "w")
-        self.proc = subprocess.Popen([self.stoke_bin, "search"] + self.args,
+        self.proc = subprocess.Popen([self.stoke_bin] + self.args,
                                      cwd = self.tdir,
                                      stdout = stdout.fileno(),
                                      stderr = stderr.fileno())
@@ -73,7 +76,8 @@ class StokeRunner(object):
             if self.tdir != '':
                 shutil.rmtree(self.tdir)
             self.tdir = ''
-            self.proc = None
+            if self.proc.poll() is None:
+                self.proc.kill()
         except:
             pass
 
@@ -82,22 +86,7 @@ def _mk_set(l):
     return "{ " + " ".join(l) + (" }" if len(l) > 0 else "}")
 
 def build_args(target):
-    return [
-      "--cpu_flags", "{ cmov sse sse2 popcnt }",
-      "--target", "target.s",
-      "--machine_output", "search.json",
-      #"--cost", "correctness",
-      "--reduction", "sum",
-      "--training_set", "{ ... }",
-      "--solver_timeout", "30000",
-      "--misalign_penalty", "3",
-      "--beta", "1.0",
-      "--distance", "hamming",
-      #"--strategy", "bounded",
-      "--strategy", "none",
-      #"--failed_verification_action", "add_counterexample",
-      "--failed_verification_action", "quit",
-      "--sig_penalty", "200"] +\
+    return ["--target", "target.s", "--machine_output", "search.json"] +\
       (["--def_in", _mk_set(target.def_in)] if target.def_in is not None else []) +\
       (["--live_out", _mk_set(target.live_out)] if target.live_out is not None else []) +\
       (["--heap_out"] if target.use_mem else [])

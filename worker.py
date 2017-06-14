@@ -1,110 +1,131 @@
 
 import httplib, time, random, json, urllib, socket
-import cPickle,synth, sys
+import synth, sys, os
 from synth import stokerunner
-from synth.families import FamilyLoader
 
+STOKE_BIN = os.path.join(os.getenv("HOME"),"expt/stoke/bin/stoke_expt")
 
-def make_target(target):
-    t = synth.SynthTarget()
-    t.def_in = target.def_in
-    t.live_out = filter(lambda x: x != "%af", target.live_out)
-    t.target = ".f:\n" + "\n".join(target.instrs) +"\nretq\n"
-    t.testcases = ""
-    return t
+def flush_response(conn):
+    resp = conn.getresponse()
+    resp.read()
 
 class StokeTask(object):
-    def __init__(self, i, families, desc):
-        self.i = i
-        self.target = make_target(families[int(desc['target'])].head)
-        self.extra_args = desc.get('args', [])
-    def start(self):
-        self.runner = stokerunner.StokeRunner()
-        runner = self.runner
-        runner.setup(self.target, None)
-        runner.add_args(self.extra_args)
-        runner.launch()
+    def __init__(self, runner, finalizer):
+        self.finalizer = finalizer
+        self.runner = runner
     def kill(self):
         self.runner.proc.kill()
     def finished(self):
         if not self.runner.finished():
             return False
-        runner = self.runner
-        j = runner.get_file("search.json")
-        if runner.successful():
-            print "STOKE finished on", self.i
-            r = json.loads(j)
-        else:
-            print "STOKE Failed on", self.i
-            print runner.get_file("stderr.out")
-            r = {"name":self.i,"error":True}
-        runner.cleanup()
-        conn.request("POST", "/job/complete?" + urllib.urlencode({'server': hostname, 'job': self.i}), json.dumps(r))
-        conn.getresponse()
+        self.finalizer(self.runner)
         return True
 
-def run_tasks(task_producer, max_tasks = 2):
-    outstanding = []
-    last_heartbeat = 0
-    try:
-        have_more = True
-        while have_more or len(outstanding) > 0:
-            while have_more and len(outstanding) < max_tasks:
-                try:
-                    t = next(task_producer)
-                    if t is not None:
-                        t.start()
-                        outstanding.append(t)
-                except StopIteration:
-                    have_more = False
-            time.sleep(0.1)
-            
-            outstanding = filter(lambda t: not t.finished(), outstanding)
-            now = time.time()
-            if now - last_heartbeat > 5:
-                conn.request("POST", "/heartbeat?server="+hostname)
-                resp = conn.getresponse()
-                last_heartbeat = now
+class Worker(object):
+    def __init__(self, conn, hostname, max_tasks = 1):
+        self.last_heartbeat = time.time()
+        self.conn = conn
+        self.max_tasks = max_tasks
+        self.outstanding = []
+        self.hostname = hostname
+    def add_tasks(self, task_producer):
+        while len(self.outstanding) < self.max_tasks:
+            t = task_producer()
+            if t is not None:
+                self.outstanding.append(t)
             else:
-                time.sleep(1)
-    except KeyboardInterrupt:
-        for o in outstanding:
+                break
+    def run(self):
+        self.outstanding = [task for task in self.outstanding if not task.finished()]
+    def cleanup(self):
+        for o in self.outstanding:
             o.kill()
+    def heartbeat(self):
+        now = time.time()
+        if now - self.last_heartbeat > 5:
+            self.conn.request("POST", "/heartbeat?worker=" + self.hostname)
+            flush_response(self.conn)
+            self.last_heartbeat = now
 
-def stoke_tasks():
-    families = FamilyLoader("targets/libs.families")
-    last_empty = time.time()
-    wait = 0
-    while True:
-        if time.time() - last_empty < wait:
-            yield None
-        else:
-            conn.request("POST", "/job/get?server="+hostname)
+def get_task_from_server(conn, hostname):
+    conn.request("POST", "/task/get?worker=" + hostname)
+    resp = conn.getresponse()
+    data = resp.read()
+    if resp.status == 204:
+        return None
+    elif resp.status == 200:
+        task_desc = json.loads(data)
+        run_desc = task_desc['run']
+        state = None
+        if task_desc['initial_state'] is not None:
+            conn.request("GET", task_desc['initial_state'])
             resp = conn.getresponse()
             if resp.status != 200:
-                print "Error from server"
+                print "failed to get initial_state from server"
+                return None
+            length = int(resp.getheader('content-length'))
+            state = resp.read(length)
+            if len(state) != length:
+                print "Didn't get full file from server"
+                return None
+            
+        runner = stokerunner.StokeRunner(STOKE_BIN)
+        runner.setup(synth.SynthTarget.from_json(run_desc['target']), initial = None, state = state)
+        runner.add_args(run_desc['args'])
+        if task_desc['final_state']:
+            runner.add_args(['--save_state', 'b.state'])
+        runner.launch()
+        def finalizer(runner):
+            task_id = task_desc['id']
+            j = runner.get_file("search.json")
+            if runner.successful():
+                print "STOKE finished on", task_id
+                #print runner.get_file("stdout.out")
+                r = json.loads(j)
             else:
-                jobs = json.loads(resp.read())
-                if len(jobs) == 0:
-                    last_empty = time.time()
-                    wait = random.uniform(0,10)
-                    continue
-                else:
-                    (name, desc) = jobs[0]
-                    yield StokeTask(name, families, desc)
-    
-def main():
-    global hostname, conn
-    hostname = socket.gethostname()
-    if len(sys.argv) > 1:
-        conn = httplib.HTTPConnection(sys.argv[1])
+                print "STOKE Failed on", task_id
+                print runner.get_file("stderr.out")
+                r = {"name": task_id,"error":True}
+            print "uploading data"
+            for log_file in run_desc['log_files']:
+                data = runner.get_file(log_file)
+                if data is not None:
+                    print "sending", len(data), "bytes to", "/data/logs/"+str(task_id)+"/"+log_file
+                    conn.request("POST","/data/logs/"+str(task_id)+"/"+log_file, data)
+                    flush_response(conn)
+            if task_desc['final_state'] is not None:
+                data = runner.get_file('b.state')
+                if data is not None:
+                    conn.request("POST",task_desc['final_state'], data)
+                    flush_response(conn)
+            runner.cleanup()
+            print "Finishing job"
+            conn.request("POST", "/task/complete?" + urllib.urlencode({'worker': hostname, 'task': task_id}), json.dumps(r))
+            flush_response(conn)
+        return StokeTask(runner, finalizer)
     else:
-        conn = httplib.HTTPConnection("localhost:8080")
-    if len(sys.argv) > 2:
-        threads = int(sys.argv[2])
-    else:
-        threads = 1
-    hostname += "-{:x}".format(random.randint(0,2**24))
-    run_tasks(stoke_tasks(), threads)
+        print "Invalid response from server to /task/get"
+        print resp.status, resp.reason
+        print data
+        return None
 
+
+def main():
+    server_address = sys.argv[1] if len(sys.argv) > 1 else "localhost:8080"
+    conn = httplib.HTTPConnection(server_address)
+    threads = int(sys.argv[2]) if len(sys.argv) > 2 else 1
+    hostname = socket.gethostname() + "-{:06x}".format(random.randint(0,2**24))
+    
+    def get_task():
+        return get_task_from_server(conn, hostname)
+    
+    worker = Worker(conn, hostname, threads)
+    try:
+        while True:
+            worker.run()
+            worker.heartbeat()
+            worker.add_tasks(get_task)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        worker.cleanup()
 main()

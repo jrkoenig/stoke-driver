@@ -9,11 +9,16 @@ class SynthTarget(object):
         self.def_in = []
         self.use_mem = False
     def _set_testcases(self, testcases):
-        stream = StringIO.StringIO()
-        with gzip.GzipFile(fileobj = stream, mode = "w") as f:
-          f.write(testcases)
-        self._testcases_gz_base64 = base64.b64encode(stream.getvalue())
+        if testcases == "":
+            self._testcases_gz_base64 = ""
+        else:
+            stream = StringIO.StringIO()
+            with gzip.GzipFile(fileobj = stream, mode = "w") as f:
+              f.write(testcases)
+            self._testcases_gz_base64 = base64.b64encode(stream.getvalue())
     def _get_testcases(self):
+        if self._testcases_gz_base64 == "":
+            return ""
         stream = StringIO.StringIO(base64.b64decode(self._testcases_gz_base64))
         with gzip.GzipFile(fileobj = stream, mode = "r") as f:
             return f.read()
