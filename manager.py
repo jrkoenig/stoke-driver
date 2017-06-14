@@ -56,7 +56,13 @@ class JobManager(object):
     def complete(self, job, result):
         with self.lock:
             if job in self.inflight:
-                if result['interrupted']:
+                if 'error' in result:
+                    print "error for", self.inflight[job][1]['run']['run'], "on task", job
+                    name = self.inflight[job][1]['run']['run']
+                    result['name'] = name
+                    self.log.write(json.dumps(result)+"\n")
+                    self.log.flush()
+                elif result['interrupted']:
                     old_task = self.inflight[job][1]
                     tid = self.task_id
                     self.task_id += 1
